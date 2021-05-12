@@ -696,3 +696,7 @@ FodyWeavers.xsd
 *.tlog
 
 # End of https://www.toptal.com/developers/gitignore/api/jetbrains,visualstudio,visualstudiocode,node,dotenv,macos,windows,linux,git
+/.idea/.gitignore
+/.idea/cruDVD.iml
+/.idea/modules.xml
+/.idea/vcs.xml
