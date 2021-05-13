@@ -1,0 +1,37 @@
+{
+  "extends": ["@ecosystem/ecosystem/typescript"],
+  "globals": {
+    "analytics": true
+  },
+  "rules": {
+    "max-len": [
+      "error",
+      {
+        "code": 120,
+        "comments": 200,
+        "ignoreStrings": true,
+        "ignoreUrls": true,
+        "ignoreTemplateLiterals": true,
+        "ignoreRegExpLiterals": true
+      }
+    ],
+    "no-restricted-imports": [
+      "error",
+      {
+        "paths": [
+          "api",
+          "ui",
+          {
+            "name": "apollo-client",
+            "message": "Please use '@apollo/client' instead."
+          },
+          {
+            "name": "graphql-tag",
+            "message": "Please use `import { gql } from '@apollo/client';` instead."
+          }
+        ],
+        "patterns": ["ecosystem-api/*", "ecosystem-ui/*", "**/../api/*", "**/../ui/*", "**/../shared/*"]
+      }
+    ]
+  }
+}
