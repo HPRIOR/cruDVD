@@ -700,3 +700,6 @@ FodyWeavers.xsd
 /.idea/cruDVD.iml
 /.idea/modules.xml
 /.idea/vcs.xml
+/.idea/codeStyles/codeStyleConfig.xml
+/.idea/codeStyles/Project.xml
+/.idea/prettier.xml
