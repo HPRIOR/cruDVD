@@ -1,0 +1,26 @@
+# This file was generated based on ".graphqlconfig". Do not edit manually.
+
+schema {
+  query: Query
+}
+
+type Film {
+  description: String!
+  film_id: ID!
+  fulltext: String!
+  language_id: Int!
+  last_update: String!
+  length: Int!
+  rating: String!
+  release_year: String!
+  rental_duration: Int!
+  rental_rate: Float!
+  replacement_cost: Float!
+  special_features: [String!]!
+  title: String!
+}
+
+type Query {
+  getFilm(title: String!): Film
+  hello: String!
+}
