@@ -9,7 +9,7 @@ describe('expressApp', () => {
     app = await createExpressApp();
   });
 
-  it('should redirect to /Graphql', async () => {
+  it('should redirect to /graphql', async () => {
     const response = await request(app).get('/');
     expect(response.status).toBe(302);
   });

@@ -22,7 +22,7 @@ const createExpressApp = async () => {
   apolloServer.applyMiddleware({ app, cors: false });
 
   app.get('/', (_, res) => {
-    res.redirect('/Graphql');
+    res.redirect('/graphql');
   });
 
   console.log(`Running server in mode: ${__prod__ ? 'Prod' : 'Dev'}`);
