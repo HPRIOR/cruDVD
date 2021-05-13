@@ -1,0 +1,16 @@
+query GetAllInfoForFilm($title: String!){
+  getFilm(title: $title){
+    film_id
+    title
+    fulltext
+    special_features
+    rating
+    replacement_cost
+    length
+    rental_rate
+    rental_duration
+    language_id
+    release_year
+    description
+  }
+}
