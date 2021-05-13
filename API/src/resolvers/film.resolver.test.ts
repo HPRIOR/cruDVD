@@ -11,7 +11,8 @@ describe('filmResolver', function () {
     await dbConn.close();
   });
 
-  const getFilmQuery = `
+  describe('getFilm', () => {
+    const getFilmQuery = `
     query GetFilm($title: String!){
       getFilm(title: $title){
       film_id
@@ -31,15 +32,31 @@ describe('filmResolver', function () {
 
   `;
 
-  const getFilmData = testGqlCall({
-    source: getFilmQuery,
-    variableValues: { title: 'Aladdin Calendar' },
-  });
+    const getFilmData = () =>
+      testGqlCall({
+        source: getFilmQuery,
+        variableValues: { title: 'Aladdin Calendar' },
+      });
 
-  it('should return data', async () => {
-    const filmData = await getFilmData;
-    expect(filmData.data).toBeDefined();
-  });
+    it('should return data', async () => {
+      const filmData = await getFilmData();
+      expect(filmData.data).toBeDefined();
+    });
 
-  it('should return correct title data', () => {});
+    it('should return correct title data', async () => {
+      const filmData = await getFilmData();
+      const title = filmData.data?.getFilm.title;
+      expect(title).toBe('Aladdin Calendar');
+    });
+    it('should return correct id data', async () => {
+      const filmData = await getFilmData();
+      const title = filmData.data?.getFilm.film_id;
+      expect(title).toBe('10');
+    });
+    it('should return correct release_year data', async () => {
+      const filmData = await getFilmData();
+      const title = filmData.data?.getFilm.release_year;
+      expect(title).toBe('2006');
+    });
+  });
 });
