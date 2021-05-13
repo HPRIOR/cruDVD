@@ -1,10 +1,12 @@
-import { BaseEntity, Column, Entity, PrimaryColumn } from 'typeorm';
+import { BaseEntity, Column, Entity, OneToMany, PrimaryColumn } from 'typeorm';
 import { Field, Float, ID, Int, ObjectType } from 'type-graphql';
+import { FilmCategory } from './FilmCategory';
 
 @ObjectType()
 @Entity()
 export class Film extends BaseEntity {
   @Field(() => ID)
+  @OneToMany(() => FilmCategory, film => film.film_id)
   @PrimaryColumn('integer')
   film_id: number;
 
