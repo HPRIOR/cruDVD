@@ -4,29 +4,41 @@ import cors from 'cors';
 import { __prod__ } from '../constants/constants';
 import { ApolloServer } from 'apollo-server-express';
 import createSchema from './createSchema';
+import cookieParser from 'cookie-parser';
+import { ContextType } from '../types/ContextType';
+import getUserFromAccessToken from '../utils/getUserWithRefreshToken';
 
 const createExpressApp = async () => {
-  const app = express();
+    const app = express();
 
-  app.set('trust proxy', 1);
+    app.set('trust proxy', 1);
 
-  app.use(
-    cors({
-      origin: process.env.CORS_ORIGIN,
-      credentials: true,
-    })
-  );
+    app.use(
+        cors({
+            origin: process.env.CORS_ORIGIN,
+            credentials: true,
+        })
+    );
 
-  const apolloServer = new ApolloServer({ schema: await createSchema() });
+    app.use(cookieParser());
 
-  apolloServer.applyMiddleware({ app, cors: false });
+    const apolloServer = new ApolloServer({
+        schema: await createSchema(),
+        context: async ({ req, res }: ContextType) => {
+            const accessToken = req.cookies['access-token'];
+            req.userId = accessToken;
+            return { req, res };
+        },
+    });
 
-  app.get('/', (_, res) => {
-    res.redirect('/graphql');
-  });
+    apolloServer.applyMiddleware({ app, cors: false });
 
-  console.log(`Running server in mode: ${__prod__ ? 'Prod' : 'Dev'}`);
-  return app;
+    app.get('/', (_, res) => {
+        res.redirect('/graphql');
+    });
+
+    console.log(`Running server in mode: ${__prod__ ? 'Prod' : 'Dev'}`);
+    return app;
 };
 
 export default createExpressApp;
