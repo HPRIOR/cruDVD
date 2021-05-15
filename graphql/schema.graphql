@@ -1,26 +1,46 @@
-# This file was gqlTypes based on ".graphqlconfig". Do not edit manually.
+# This file was generated based on ".graphqlconfig". Do not edit manually.
 
 schema {
-  query: Query
+    query: Query
 }
 
 type Film {
-  description: String!
-  film_id: ID!
-  fulltext: String!
-  language_id: Int!
-  last_update: String!
-  length: Int!
-  rating: String!
-  release_year: String!
-  rental_duration: Int!
-  rental_rate: Float!
-  replacement_cost: Float!
-  special_features: [String!]!
-  title: String!
+    category: String
+    description: String!
+    film_id: ID!
+    fulltext: String!
+    language_id: Int!
+    last_update: String!
+    length: Int!
+    rating: String!
+    release_year: String!
+    rental_duration: Int!
+    rental_rate: Float!
+    replacement_cost: Float!
+    special_features: [String!]!
+    title: String!
+}
+
+type FilmWithCategory {
+    category: String
+    description: String!
+    film_id: ID!
+    fulltext: String!
+    language_id: Int!
+    last_update: String!
+    length: Int!
+    name: String!
+    rating: String!
+    release_year: String!
+    rental_duration: Int!
+    rental_rate: Float!
+    replacement_cost: Float!
+    special_features: [String!]!
+    title: String!
 }
 
 type Query {
-  getFilm(title: String!): Film
-  hello: String!
+    getFilmByTitle(title: String!): Film
+    getFilmsByCategory(categoryName: String!): [FilmWithCategory!]
+    hello: String!
 }

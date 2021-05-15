@@ -1,5 +1,5 @@
 query GetAllInfoForFilm($title: String!){
-  getFilm(title: $title){
+  getFilmByTitle(title: $title){
     film_id
     title
     fulltext
