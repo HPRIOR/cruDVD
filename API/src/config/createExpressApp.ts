@@ -6,7 +6,7 @@ import { ApolloServer } from 'apollo-server-express';
 import createSchema from './createSchema';
 import cookieParser from 'cookie-parser';
 import { ContextType } from '../types/ContextType';
-import getUserFromAccessToken from '../utils/getUserWithRefreshToken';
+import authoriseContext from '../utils/authoriseContext';
 
 const createExpressApp = async () => {
     const app = express();
@@ -24,11 +24,7 @@ const createExpressApp = async () => {
 
     const apolloServer = new ApolloServer({
         schema: await createSchema(),
-        context: async ({ req, res }: ContextType) => {
-            const accessToken = req.cookies['access-token'];
-            req.userId = accessToken;
-            return { req, res };
-        },
+        context: authoriseContext,
     });
 
     apolloServer.applyMiddleware({ app, cors: false });
