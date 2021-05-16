@@ -10,7 +10,7 @@ const generateTokens = (user: User): { accessToken: string; refreshToken: string
         }
     ),
     accessToken: sign({ userId: user.id, username: user.username }, process.env.ACCESS_TOKEN_SECRET!, {
-        expiresIn: '15min',
+        expiresIn: '15s',
     }),
 });
 

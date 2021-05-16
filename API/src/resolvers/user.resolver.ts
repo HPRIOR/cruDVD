@@ -20,7 +20,7 @@ export class UserResolver {
         if (!user) {
             return { error: [error] };
         }
-        const validPass = await argon2.verify(input.password, user.password);
+        const validPass = await argon2.verify(user.password, input.password);
         if (!validPass) {
             return { error: [error] };
         }
@@ -33,7 +33,7 @@ export class UserResolver {
     @Mutation(() => UserResponse)
     async register(@Arg('input') input: UsernamePasswordInput, @Ctx() context: ContextType) {
         const inputIsValid = true;
-        if (!inputIsValid) return { error: ['invalid input'] }; // TODO
+        if (!inputIsValid) return { error: ['invalid input'] }; // TODO check input and for same username in db
         const encryptedPassword = await argon2.hash(input.password);
         const user = await User.create({
             id: uuid(),
@@ -48,27 +48,34 @@ export class UserResolver {
         return { user };
     }
 
-    @Mutation(() => String)
-    async logout() {
-        return 'logout';
-    }
-
     @Mutation(() => Boolean)
-    async invalidateTokens(@Ctx() context: ContextType) {
-        if (!context.user) {
+    async logout(@Ctx() context: ContextType) {
+        if (!context.user && !context.req.userId) {
             return false;
         }
-        await getConnection()
-            .createQueryBuilder()
-            .update(User)
-            .set({ count: context.user.count + 1 })
-            .where('id = :id', { id: context.user.id })
-            .execute();
-        return true;
+        const user = await User.findOne({ where: { id: context.req.userId } });
+        if (!user) {
+            return false;
+        } else {
+            context.res.clearCookie('access-token');
+            context.req.userId = null;
+            context.user = null;
+            await getConnection()
+                .createQueryBuilder()
+                .update(User)
+                .set({ count: user.count + 1 })
+                .where('id = :id', { id: user.id })
+                .execute();
+            return true;
+        }
     }
 
     @Query(() => User, { nullable: true })
     async checkLogin(@Ctx() context: any) {
-        return context.user;
+        if (context.user) {
+            return context.user;
+        }
+        const user = await User.findOne({ where: { id: context.req.userId } });
+        return user ? user : null;
     }
 }
