@@ -50,7 +50,8 @@ export class UserResolver {
 
     @Mutation(() => Boolean)
     async logout(@Ctx() context: ContextType) {
-        if (!context.user && !context.req.userId) {
+        const noUserLoggedIn = !context.user && !context.req.userId;
+        if (noUserLoggedIn) {
             return false;
         }
         const user = await User.findOne({ where: { id: context.req.userId } });
@@ -58,7 +59,7 @@ export class UserResolver {
             return false;
         } else {
             context.res.clearCookie('access-token');
-            context.req.userId = null;
+            context.res.clearCookie('refresh-token');
             context.user = null;
             await getConnection()
                 .createQueryBuilder()

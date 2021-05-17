@@ -5,10 +5,12 @@ import { verify } from 'jsonwebtoken';
 
 /*
 Access token acts as a cache. If it is present the request in the context object will be modified to include user
-info, but the User object in the context will be null. This allows for db lookups to be delegated to resolvers - and
-db lookups to only occur when needed. If an access token is invalid, the refresh token makes a db lookup to check if
-an access token can be created. If successful it creates new access and refresh token, and passes the user object to the
-context so that the request can be made without another lookup when passed to the resolver.
+info, but the User object in the context will be null as it is not looked up in the db.
+This allows for db lookups to be delegated to resolvers. Consequently, lookups only occur when needed.
+If an access token is invalid, the refresh token makes a db lookup to check if an access token can be created.
+If successful it creates new access and refresh token, and passes the user object to the
+context so that the request can be made without another lookup when passed to the resolver - negating the need for two
+when cache is refreshed.
  */
 const authoriseContext = async ({ req, res }: any): Promise<ContextType> => {
     const accessToken = req.cookies['access-token'];
@@ -21,10 +23,12 @@ const authoriseContext = async ({ req, res }: any): Promise<ContextType> => {
 
 const context = async ({ req, res }: any, accessToken: string, refreshToken: string): Promise<ContextType> => {
     const userInfo = await tryGetUserInfoFromAccessToken(accessToken);
+    // cache hit - don't do lookup user
     if (userInfo) {
-        req.userId = userInfo!.userId;
+        req.userId = userInfo!.userId; // change to more general object about user so it can be used instead of lookup
         return { req, res, user: null };
     } else {
+        // cache miss, look up to see if user is still valid
         return userInContext({ req, res }, refreshToken);
     }
 };
