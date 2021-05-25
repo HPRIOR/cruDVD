@@ -5,8 +5,7 @@ import { __prod__ } from '../constants/constants';
 import { ApolloServer } from 'apollo-server-express';
 import createSchema from './createSchema';
 import cookieParser from 'cookie-parser';
-import { ContextType } from '../types/ContextType';
-import authoriseContext from '../utils/authoriseContext';
+import authoriseContext from '../utils/auth/authoriseContext';
 
 const createExpressApp = async () => {
     const app = express();
