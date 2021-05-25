@@ -1,28 +1,36 @@
 import { Arg, Ctx, Mutation, Query, Resolver } from 'type-graphql';
 import { User } from '../entities/User';
-import generateTokens from '../utils/generateTokens';
+import generateTokens from '../utils/auth/generateTokens';
 import { v4 as uuid } from 'uuid';
 import * as argon2 from 'argon2';
-import { UsernamePasswordInput } from './usernamePasswordInput';
-import { UserResponse } from './userResponseType';
-import { ContextType } from '../types/ContextType';
+import { RegisterInput } from './gqlTypes/registerInput';
+import { UserResponse } from './gqlTypes/userResponse';
+import { ContextType } from '../types/contextType';
 import { getConnection } from 'typeorm';
+import { ValidateUsernamePasswordInput } from '../utils/auth/validateUsernamePassswordInput';
+import {
+    passwordContainsSymbols,
+    passwordContainsUpperCase,
+    registerInputIsValid,
+    shortPassword,
+    shortUsername,
+} from '../utils/auth/validateRegisterInput';
 
 @Resolver()
 export class UserResolver {
     @Mutation(() => UserResponse, { nullable: true })
-    async login(@Arg('input') input: UsernamePasswordInput, @Ctx() context: ContextType) {
+    async login(@Arg('input') input: RegisterInput, @Ctx() context: ContextType) {
         if (context.user) {
             return { user: context.user };
         }
-        const user = await User.findOne({ where: { username: input.username } });
+        const user = await User.findOne({ where: [{ email: input.email }, { username: input.username }] });
         const error = 'Invalid username or password';
         if (!user) {
-            return { error: [error] };
+            return { errors: [error] };
         }
         const validPass = await argon2.verify(user.password, input.password);
         if (!validPass) {
-            return { error: [error] };
+            return { errors: [error] };
         }
         const { accessToken, refreshToken } = generateTokens(user);
         context.res.cookie('access-token', accessToken);
@@ -31,13 +39,22 @@ export class UserResolver {
     }
 
     @Mutation(() => UserResponse)
-    async register(@Arg('input') input: UsernamePasswordInput, @Ctx() context: ContextType) {
-        const inputIsValid = true;
-        if (!inputIsValid) return { error: ['invalid input'] }; // TODO check input and for same username in db
+    async register(@Arg('input') input: RegisterInput, @Ctx() context: ContextType) {
+        const inputValidators: ValidateUsernamePasswordInput[] = [
+            shortPassword,
+            shortUsername,
+            passwordContainsSymbols,
+            passwordContainsUpperCase,
+        ];
+        const errors = registerInputIsValid(input, inputValidators);
+        const errorsExist = errors.userError || errors.passError || errors.emailError || errors.genericError;
+        if (errorsExist) return { errors: errors };
+        // TODO check for same user in db, change validators to return object which maps to userResponseError
         const encryptedPassword = await argon2.hash(input.password);
         const user = await User.create({
             id: uuid(),
             username: input.username,
+            email: input.email,
             password: encryptedPassword,
             count: 0,
         }).save();
@@ -61,6 +78,7 @@ export class UserResolver {
             context.res.clearCookie('access-token');
             context.res.clearCookie('refresh-token');
             context.user = null;
+            // invalidate refresh token
             await getConnection()
                 .createQueryBuilder()
                 .update(User)
@@ -75,6 +93,9 @@ export class UserResolver {
     async checkLogin(@Ctx() context: any) {
         if (context.user) {
             return context.user;
+        }
+        if (!context.req.userId) {
+            return null;
         }
         const user = await User.findOne({ where: { id: context.req.userId } });
         return user ? user : null;
