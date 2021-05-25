@@ -49,7 +49,6 @@ export class UserResolver {
         const errors = registerInputIsValid(input, inputValidators);
         const errorsExist = errors.userError || errors.passError || errors.emailError || errors.genericError;
         if (errorsExist) return { errors: errors };
-        // TODO check for same user in db, change validators to return object which maps to userResponseError
         const encryptedPassword = await argon2.hash(input.password);
         const user = await User.create({
             id: uuid(),
