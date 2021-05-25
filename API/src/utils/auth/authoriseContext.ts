@@ -1,16 +1,17 @@
-import { ContextType } from '../types/ContextType';
+import { ContextType } from '../../types/contextType';
 import generateTokens from './generateTokens';
-import { User } from '../entities/User';
+import { User } from '../../entities/User';
 import { verify } from 'jsonwebtoken';
 
 /*
 Access token acts as a cache. If it is present the request in the context object will be modified to include user
 info, but the User object in the context will be null as it is not looked up in the db.
-This allows for db lookups to be delegated to resolvers. Consequently, lookups only occur when needed.
-If an access token is invalid, the refresh token makes a db lookup to check if an access token can be created.
-If successful it creates new access and refresh token, and passes the user object to the
+This allows for db lookups to be delegated to resolvers, and user information to be retrieved in the context.
+Consequently, lookups only occur when needed.If an access token is invalid, the refresh token makes a db lookup to check
+if an access token can be created. If successful it creates new access and refresh token, and passes the user object to the
 context so that the request can be made without another lookup when passed to the resolver - negating the need for two
 when cache is refreshed.
+
  */
 const authoriseContext = async ({ req, res }: any): Promise<ContextType> => {
     const accessToken = req.cookies['access-token'];
@@ -18,10 +19,10 @@ const authoriseContext = async ({ req, res }: any): Promise<ContextType> => {
     if (!accessToken && !refreshToken) {
         return { req, res, user: null };
     }
-    return context({ req, res }, accessToken || '', refreshToken || '');
+    return generateContext({ req, res }, accessToken || '', refreshToken || '');
 };
 
-const context = async ({ req, res }: any, accessToken: string, refreshToken: string): Promise<ContextType> => {
+const generateContext = async ({ req, res }: any, accessToken: string, refreshToken: string): Promise<ContextType> => {
     const userInfo = await tryGetUserInfoFromAccessToken(accessToken);
     // cache hit - don't do lookup user
     if (userInfo) {
@@ -34,11 +35,12 @@ const context = async ({ req, res }: any, accessToken: string, refreshToken: str
 };
 
 const userInContext = async ({ req, res }: any, refreshToken: string): Promise<ContextType> => {
-    const user = await getUserFromRefreshToken(refreshToken);
+    const user = await tryGetUserFromRefreshToken(refreshToken);
     if (user) {
         const { accessToken, refreshToken } = generateTokens(user);
         res.cookie('access-token', accessToken);
         res.cookie('refresh-token', refreshToken);
+        req.userId = user.id;
     }
     return { req, res, user };
 };
@@ -50,16 +52,20 @@ const tryGetUserInfoFromAccessToken = async (token: string): Promise<{ userId: s
     return null;
 };
 
-const getUserFromRefreshToken = async (token: string) => {
+const tryGetUserFromRefreshToken = async (token: string) => {
     try {
         const userInfo = verify(token, process.env.REFRESH_TOKEN_SECRET!) as {
             userId: string;
             username: string;
             count: number;
         };
-        const user = await User.findOne({ where: { id: userInfo.userId, count: userInfo.count } });
-        return user ? user : null; // TODO problem not looging out properly
+        // check if token is valid with db comparison
+        const user = await User.findOne({
+            where: { id: userInfo.userId, email: userInfo.username, count: userInfo.count },
+        });
+        return user ? user : null;
     } catch {}
+    // invalid token
     return null;
 };
 export default authoriseContext;
