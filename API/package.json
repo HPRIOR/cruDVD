@@ -42,6 +42,7 @@
     "graphql": "^15.5.0",
     "jsonwebtoken": "^8.5.1",
     "pg": "^8.6.0",
+    "purify-ts": "^0.16.3",
     "type-graphql": "^1.1.1",
     "typeorm": "^0.2.32",
     "uuid": "^8.3.2"
