@@ -7,7 +7,7 @@ export const testDbConnection = () => {
         port: 5432,
         username: 'postgres',
         password: 'postgres',
-        database: 'dvdrental',
+        database: 'crudDVDTestDB',
         synchronize: false,
         entities: [__dirname + '/../entities/*.*'],
     });
