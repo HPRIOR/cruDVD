@@ -171,7 +171,6 @@ describe('filmResolver', function () {
                 password: 'pA%',
                 email: 'test@test.com',
             });
-            console.log(gqlResponse.data?.register);
             const error = gqlResponse.data?.register.errors.passError;
             expect(error).not.toBeNull();
             expect(error).toBeDefined();
@@ -235,6 +234,35 @@ describe('filmResolver', function () {
                 email: 'test@test.com',
             });
             const gqlError = gqlResponseNoPassword.errors;
+            expect(gqlError).toBeDefined();
+        });
+        it('should return error when username is in db', async () => {
+            await registerUser(cookieFuncStub, {
+                username: 'username',
+                email: 'test@test.com',
+                password: '1234afasFASD!£%!£%',
+            });
+            const gqlResponse = await registerUser(cookieFuncStub, {
+                username: 'username',
+                email: 'test@test2.com',
+                password: '1234afasFASD!£%!£%',
+            });
+            const gqlError = gqlResponse.errors;
+            expect(gqlError).toBeDefined();
+        });
+
+        it('should return error when email is already in db', async () => {
+            await registerUser(cookieFuncStub, {
+                username: 'username',
+                email: 'test@test.com',
+                password: '1234afasFASD!£%!£%',
+            });
+            const gqlResponse = await registerUser(cookieFuncStub, {
+                username: 'username2',
+                email: 'test@test.com',
+                password: '1234afasFASD!£%!£%',
+            });
+            const gqlError = gqlResponse.errors;
             expect(gqlError).toBeDefined();
         });
     });
