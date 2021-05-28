@@ -2,6 +2,7 @@ import { ContextType } from '../../types/contextType';
 import generateTokens from './generateTokens';
 import { User } from '../../entities/User';
 import { verify } from 'jsonwebtoken';
+import express from 'express';
 
 /*
 Access token acts as a cache. If it is present the request in the context object will be modified to include user
@@ -13,39 +14,48 @@ context so that the request can be made without another lookup when passed to th
 when cache is refreshed.
 
  */
-const authoriseContext = async ({ req, res }: any): Promise<ContextType> => {
+
+type ExpressReqRes = { req: express.Request; res: express.Response };
+const authoriseContext = async ({ req, res }: ExpressReqRes): Promise<ContextType> => {
     const accessToken = req.cookies['access-token'];
     const refreshToken = req.cookies['refresh-token'];
     if (!accessToken && !refreshToken) {
         return { req, res, user: null };
     }
-    return generateContext({ req, res }, accessToken || '', refreshToken || '');
+    return tryGenerateContextWithAccessToken({ req, res }, accessToken || '', refreshToken || '');
 };
 
-const generateContext = async ({ req, res }: any, accessToken: string, refreshToken: string): Promise<ContextType> => {
-    const userInfo = await tryGetUserInfoFromAccessToken(accessToken);
+const tryGenerateContextWithAccessToken = async (
+    { req, res }: ExpressReqRes,
+    accessToken: string,
+    refreshToken: string
+): Promise<ContextType> => {
+    const userInfo = tryGetUserInfoFromAccessToken(accessToken);
     // cache hit - don't do lookup user
     if (userInfo) {
-        req.userId = userInfo!.userId; // change to more general object about user so it can be used instead of lookup
+        (req as any).userId = userInfo!.userId; // change to more general object about user so it can be used instead of lookup
         return { req, res, user: null };
     } else {
         // cache miss, look up to see if user is still valid
-        return userInContext({ req, res }, refreshToken);
+        return tryGenerateContextWithRefreshToken({ req, res }, refreshToken);
     }
 };
 
-const userInContext = async ({ req, res }: any, refreshToken: string): Promise<ContextType> => {
+const tryGenerateContextWithRefreshToken = async (
+    { req, res }: ExpressReqRes,
+    refreshToken: string
+): Promise<ContextType> => {
     const user = await tryGetUserFromRefreshToken(refreshToken);
     if (user) {
         const { accessToken, refreshToken } = generateTokens(user);
         res.cookie('access-token', accessToken);
         res.cookie('refresh-token', refreshToken);
-        req.userId = user.id;
+        (req as any).userId = user.id;
     }
     return { req, res, user };
 };
 
-const tryGetUserInfoFromAccessToken = async (token: string): Promise<{ userId: string; username: string } | null> => {
+const tryGetUserInfoFromAccessToken = (token: string): { userId: string; username: string } | null => {
     try {
         return verify(token, process.env.ACCESS_TOKEN_SECRET!) as { userId: string; username: string };
     } catch {}
@@ -61,7 +71,7 @@ const tryGetUserFromRefreshToken = async (token: string) => {
         };
         // check if token is valid with db comparison
         const user = await User.findOne({
-            where: { id: userInfo.userId, email: userInfo.username, count: userInfo.count },
+            where: { id: userInfo.userId, username: userInfo.username, count: userInfo.count },
         });
         return user ? user : null;
     } catch {}
