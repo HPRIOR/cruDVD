@@ -5,7 +5,7 @@ import { User } from '../entities/User';
 import { Express } from 'express';
 import createExpressApp from '../config/createExpressApp';
 
-describe('filmResolver', function () {
+describe('userResolver', function () {
     let dbConn: Connection;
     let express: Express;
     beforeAll(async () => {
