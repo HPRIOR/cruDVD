@@ -81,4 +81,38 @@ describe('authorise context', () => {
             user: { id: mockUser.id, username: mockUser.username, email: mockUser.email, count: mockUser.count },
         });
     });
+
+    it('should not user if: access-t: invalid, refresh-t: valid, no match with db', async () => {
+        const tokenCheckResultOne = undefined;
+        const tokenCheckResultTwo = { userId: '1234', username: 'test-user', count: 1 };
+        (verify as any).mockReturnValueOnce(tokenCheckResultOne).mockReturnValueOnce(tokenCheckResultTwo);
+
+        const mockUser = undefined;
+        (User.findOne as any).mockResolvedValue(mockUser);
+
+        const tokens = { accessToken: 'access-token', refreshToken: 'refresh-token' };
+        (generateTokens as any).mockReturnValue(tokens);
+
+        // 'mock' express.res.cookie function
+        let refreshToken;
+        let accessToken;
+        const context: any = {
+            req: { cookies: { 'access-token': '1234', 'refresh-token': '4321' } },
+            res: {
+                cookie: (tokenKey: string, token: string) => {
+                    if (tokenKey === 'access-token') {
+                        accessToken = { 'access-token': 'signed-' + token };
+                    }
+                    if (tokenKey === 'refresh-token') {
+                        refreshToken = { 'refresh-token': 'signed-' + token };
+                    }
+                },
+            },
+            user: null,
+        };
+        const result = await authoriseContext(context);
+
+        // modify result to include mocked express.res.cookie call
+        expect(result).toStrictEqual(context);
+    });
 });

@@ -62,6 +62,7 @@ const tryGetUserInfoFromAccessToken = (token: string): { userId: string; usernam
     return null;
 };
 
+// this will only return a user if the refresh token is valid, and it matches count information in db
 const tryGetUserFromRefreshToken = async (token: string) => {
     try {
         const userInfo = verify(token, process.env.REFRESH_TOKEN_SECRET!) as {
