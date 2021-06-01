@@ -21,4 +21,8 @@ export class User extends BaseEntity {
 
     @Column({ default: 0 })
     count: number;
+
+    //TODO updated at
+
+    //TODO created at
 }
