@@ -31,6 +31,12 @@ describe('userResolver', function () {
             }
           `;
 
+    const logoutQuery = `
+        mutation Logout{
+            logout
+        }
+    `;
+
     const registerMutation = `
         mutation Register($input: RegisterInput!){
             register(input: $input){
@@ -73,14 +79,14 @@ describe('userResolver', function () {
         });
     }
     describe('Check login', () => {
-        it('should return null when gqlResponse and req is undefined', async () => {
+        it('should return null when user and req is undefined', async () => {
             const loggedIn = await testGqlCall({
                 source: checkLoginQuery,
                 contextValue: { req: { userId: undefined }, user: undefined },
             });
             expect(loggedIn.data?.checkLogin).toBeNull();
         });
-        it('should return null when gqlResponse is undefined', async () => {
+        it('should return null when user is undefined', async () => {
             const loggedIn = await testGqlCall({
                 source: checkLoginQuery,
                 contextValue: { req: { userId: null }, user: undefined },
@@ -102,7 +108,7 @@ describe('userResolver', function () {
             expect(loggedIn.data?.checkLogin).toBeNull();
         });
 
-        it('should return gqlResponse when in context', async () => {
+        it('should return user when in context', async () => {
             const gqlResponse = new User();
             gqlResponse.id = '1';
             gqlResponse.count = 0;
@@ -117,7 +123,7 @@ describe('userResolver', function () {
             expect(loggedIn.data?.checkLogin.username).toBe('test-user');
         });
 
-        it('should find gqlResponse in DB when gqlResponse id in context', async () => {
+        it('should find user in DB when user id in context', async () => {
             const gqlResponse = await registerUser(cookieFuncStub);
             const loggedIn = await testGqlCall({
                 source: checkLoginQuery,
@@ -129,20 +135,20 @@ describe('userResolver', function () {
     });
 
     describe('register', () => {
-        it('should return gqlResponse after registering ', async () => {
+        it('should return user after registering ', async () => {
             const gqlResponse = await registerUser();
             expect(gqlResponse).not.toBeNull();
         });
-        it('should return gqlResponse with correct username ', async () => {
+        it('should return user with correct username ', async () => {
             const gqlResponse = await registerUser();
             expect(gqlResponse.data?.register.user.username).toBe('test-user');
         });
 
-        it('should return gqlResponse with correct email ', async () => {
+        it('should return user with correct email ', async () => {
             const gqlResponse = await registerUser();
             expect(gqlResponse.data?.register.user.email).toBe('test@test.com');
         });
-        it('should return a gqlResponse with a count of 0', async () => {
+        it('should return a user with a count of 0', async () => {
             const gqlResponse = await registerUser();
             const dbUser = await User.findOne({ id: gqlResponse.data?.register.user.id });
             expect(dbUser?.count).toBe(0);
@@ -236,7 +242,7 @@ describe('userResolver', function () {
             const gqlError = gqlResponseNoPassword.errors;
             expect(gqlError).toBeDefined();
         });
-        it('should return error when username is in db', async () => {
+        it('should return error when username is already in db', async () => {
             await registerUser(cookieFuncStub, {
                 username: 'username',
                 email: 'test@test.com',
@@ -264,6 +270,27 @@ describe('userResolver', function () {
             });
             const gqlError = gqlResponse.errors;
             expect(gqlError).toBeDefined();
+        });
+    });
+    describe('logout', () => {
+        const logoutMut = async (
+            context: any = {
+                req: { userId: null },
+                res: {
+                    cookie: cookieFuncStub,
+                },
+                user: null,
+            }
+        ) =>
+            await testGqlCall({
+                source: logoutQuery,
+                contextValue: context,
+            });
+
+        it('should return false when no user logged in', async () => {
+            const logout = await logoutMut();
+            console.log(logout.data?.logout);
+            expect(logout.data?.logout).toBe(false);
         });
     });
 });
