@@ -9,7 +9,7 @@ export class Actor extends BaseEntity {
     actor_id: number;
 
     @Column()
-    @Field()
+    @Field({ nullable: true })
     first_name: string;
 
     @Column()
