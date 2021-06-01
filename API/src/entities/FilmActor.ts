@@ -6,11 +6,11 @@ import { Film } from './Film';
 export class FilmActor extends BaseEntity {
     @PrimaryColumn()
     @OneToOne(() => Actor, actor => actor.actor_id)
-    actor_id: number;
+    actor_id: number; // type = Actor
 
     @PrimaryColumn()
     @OneToOne(() => Film, film => film.film_id)
-    film_id: number;
+    film_id: number; / type = Film
 
     @UpdateDateColumn()
     last_update: string;
