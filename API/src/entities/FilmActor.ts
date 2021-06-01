@@ -10,7 +10,7 @@ export class FilmActor extends BaseEntity {
 
     @PrimaryColumn()
     @OneToOne(() => Film, film => film.film_id)
-    film_id: number; / type = Film
+    film_id: number; // type = Film
 
     @UpdateDateColumn()
     last_update: string;
