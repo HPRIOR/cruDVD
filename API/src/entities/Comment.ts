@@ -21,7 +21,7 @@ export class Comment extends BaseEntity {
     @Field()
     @OneToOne(() => Film, film => film.film_id)
     @Column()
-    film_id: number;
+    film_id: number; // type Film
 
     @Field()
     @Column()
