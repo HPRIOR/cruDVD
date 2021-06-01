@@ -1,16 +1,20 @@
-import { BaseEntity, Column, Entity, ManyToOne, OneToOne, PrimaryColumn } from 'typeorm';
+import { BaseEntity, Column, Entity, JoinColumn, OneToOne, PrimaryColumn } from 'typeorm';
 import { Category } from './Category';
 import { Film } from './Film';
 
 @Entity()
 export class FilmCategory extends BaseEntity {
-    @OneToOne(() => Category, cat => cat.category_id)
     @PrimaryColumn()
     category_id: number;
+    @JoinColumn({ name: 'category_id' })
+    @OneToOne(() => Category, cat => cat.film_category)
+    category: Category;
 
-    @OneToOne(() => Film, film => film.film_id)
     @PrimaryColumn()
     film_id: number;
+    @JoinColumn({ name: 'film_id' })
+    @OneToOne(() => Film, film => film.film_category)
+    film: Film;
 
     @Column()
     last_update: string;

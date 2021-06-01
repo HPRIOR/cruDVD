@@ -1,10 +1,8 @@
-import { BaseEntity, Column, Entity, OneToMany, OneToOne, PrimaryColumn, UpdateDateColumn } from 'typeorm';
-import { Field, ObjectType } from 'type-graphql';
+import { BaseEntity, Column, Entity, OneToOne, PrimaryColumn, UpdateDateColumn } from 'typeorm';
 import { FilmCategory } from './FilmCategory';
 
 @Entity()
 export class Category extends BaseEntity {
-    @OneToOne(() => FilmCategory, filmCat => filmCat.category_id)
     @PrimaryColumn()
     category_id: number;
 
@@ -13,4 +11,7 @@ export class Category extends BaseEntity {
 
     @UpdateDateColumn()
     last_update: string;
+
+    @OneToOne(() => FilmCategory, filmCat => filmCat.category)
+    film_category: FilmCategory;
 }

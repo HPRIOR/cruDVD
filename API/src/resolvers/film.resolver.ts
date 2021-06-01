@@ -1,8 +1,9 @@
 import { Arg, Field, FieldResolver, ObjectType, Query, Resolver, Root } from 'type-graphql';
 import { Film } from '../entities/Film';
 import { Category } from '../entities/Category';
-import { getConnection } from 'typeorm';
+import { createQueryBuilder, getConnection } from 'typeorm';
 import { Actor } from '../entities/Actor';
+import { FilmCategory } from '../entities/FilmCategory';
 
 @ObjectType()
 class FilmWithCategory extends Film {
@@ -14,15 +15,14 @@ class FilmWithCategory extends Film {
 class FilmResolver {
     // root object in field resolver is the current object being queried by the resolver - the current film
     @FieldResolver(() => String, { nullable: true })
-    async category(@Root() film: Film): Promise<Category | null> {
-        const categoryName = await getConnection().query(`
-      select distinct c.name
-      from film_category fc,
-           category c
-      where fc.film_id = ${film.film_id}
-        and fc.category_id = c.category_id
-    `);
-        return categoryName[0].name || null;
+    async category(@Root() film: Film): Promise<string | null> {
+        const category = await getConnection()
+            .getRepository(Category)
+            .createQueryBuilder('c')
+            .leftJoin(FilmCategory, 'fc', 'fc."category_id" = c."category_id"')
+            .where('fc."film_id" = :film_id', { film_id: film.film_id })
+            .getOne();
+        return category?.name || null;
     }
 
     @FieldResolver(() => [Actor], { nullable: true })

@@ -8,7 +8,6 @@ import { Language } from './Language';
 @Entity()
 export class Film extends BaseEntity {
     @Field(() => ID)
-    @OneToOne(() => FilmCategory, film => film.film_id)
     @OneToOne(() => FilmActor, filmActor => filmActor.film_id)
     @PrimaryColumn('integer')
     film_id: number;
@@ -61,4 +60,7 @@ export class Film extends BaseEntity {
     @Field()
     @Column('tsvector')
     fulltext: string;
+
+    @OneToOne(() => FilmCategory, film => film.film)
+    film_category: FilmCategory;
 }
