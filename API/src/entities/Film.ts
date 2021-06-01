@@ -61,6 +61,6 @@ export class Film extends BaseEntity {
     @Column('tsvector')
     fulltext: string;
 
-    @OneToOne(() => FilmCategory, film => film.film)
+    @OneToOne(() => FilmCategory, filmCat => filmCat.film)
     film_category: FilmCategory;
 }
