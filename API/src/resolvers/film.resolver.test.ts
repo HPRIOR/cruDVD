@@ -77,7 +77,6 @@ describe('filmResolver', function () {
         it('should return correct language', async () => {
             const filmData = await getFilmData();
             const language = filmData.data?.getFilmByTitle.language;
-            console.log(language);
             expect(language).toBe('English');
         });
     });
