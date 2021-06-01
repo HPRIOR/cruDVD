@@ -1,4 +1,4 @@
-import { BaseEntity, Column, Entity, OneToOne, PrimaryColumn, UpdateDateColumn } from 'typeorm';
+import { BaseEntity, Entity, OneToOne, PrimaryColumn, UpdateDateColumn } from 'typeorm';
 import { Actor } from './Actor';
 import { Film } from './Film';
 
