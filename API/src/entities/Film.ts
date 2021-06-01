@@ -1,4 +1,4 @@
-import { BaseEntity, Column, Entity, OneToMany, OneToOne, PrimaryColumn, UpdateDateColumn } from 'typeorm';
+import { BaseEntity, Column, Entity, OneToOne, PrimaryColumn, UpdateDateColumn } from 'typeorm';
 import { Field, Float, ID, Int, ObjectType } from 'type-graphql';
 import { FilmCategory } from './FilmCategory';
 import { FilmActor } from './FilmActor';
