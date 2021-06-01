@@ -27,7 +27,7 @@ export class Film extends BaseEntity {
     @Field(() => Int)
     @OneToOne(() => Language, lang => lang.language_id)
     @Column('smallint')
-    language_id: number;
+    language_id: number; // the type here should be of Language
 
     @Field(() => Int)
     @Column('smallint')
