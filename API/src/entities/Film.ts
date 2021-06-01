@@ -8,7 +8,7 @@ import { Language } from './Language';
 @Entity()
 export class Film extends BaseEntity {
     @Field(() => ID)
-    @OneToOne(() => FilmActor, filmActor => filmActor.film_id)
+    @OneToOne(() => FilmActor, filmActor => filmActor.film_id) // new field with type FilmActor[], OneToMany
     @PrimaryColumn('integer')
     film_id: number;
 
