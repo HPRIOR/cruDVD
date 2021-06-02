@@ -1,4 +1,12 @@
-import { BaseEntity, Column, Entity, PrimaryColumn, PrimaryGeneratedColumn } from 'typeorm';
+import {
+    BaseEntity,
+    Column,
+    CreateDateColumn,
+    Entity,
+    PrimaryColumn,
+    PrimaryGeneratedColumn,
+    UpdateDateColumn,
+} from 'typeorm';
 import { Field, ID, ObjectType } from 'type-graphql';
 
 @Entity()
@@ -22,7 +30,9 @@ export class User extends BaseEntity {
     @Column({ default: 0 })
     count: number;
 
-    //TODO updated at
+    @UpdateDateColumn()
+    updatedAt: Date;
 
-    //TODO created at
+    @CreateDateColumn()
+    createdAt: Date;
 }

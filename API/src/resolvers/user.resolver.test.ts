@@ -153,6 +153,17 @@ describe('userResolver', function () {
             const dbUser = await User.findOne({ id: gqlResponse.data?.register.user.id });
             expect(dbUser?.count).toBe(0);
         });
+        it('should return a user with a createdAt column', async () => {
+            const gqlResponse = await registerUser();
+            const dbUser = await User.findOne({ id: gqlResponse.data?.register.user.id });
+            expect(dbUser?.createdAt).toBeDefined();
+        });
+
+        it('should return a user with a updatedAt column', async () => {
+            const gqlResponse = await registerUser();
+            const dbUser = await User.findOne({ id: gqlResponse.data?.register.user.id });
+            expect(dbUser?.updatedAt).toBeDefined();
+        });
         it('should call cookie creating function twice', async () => {
             const mockCallback = jest.fn((a: string, b: string) => [a, b]);
             await registerUser(mockCallback);
