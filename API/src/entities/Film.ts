@@ -5,7 +5,7 @@ import { FilmActor } from './FilmActor';
 import { Language } from './Language';
 
 @ObjectType()
-@Entity()
+@Entity({ synchronize: false })
 export class Film extends BaseEntity {
     @Field(() => ID)
     @PrimaryColumn('integer')

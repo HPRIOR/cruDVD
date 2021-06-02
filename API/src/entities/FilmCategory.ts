@@ -2,7 +2,7 @@ import { BaseEntity, Column, Entity, JoinColumn, OneToOne, PrimaryColumn } from 
 import { Category } from './Category';
 import { Film } from './Film';
 
-@Entity()
+@Entity({ synchronize: false })
 export class FilmCategory extends BaseEntity {
     @PrimaryColumn()
     category_id: number;

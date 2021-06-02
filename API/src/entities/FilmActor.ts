@@ -2,7 +2,7 @@ import { BaseEntity, Entity, JoinColumn, ManyToOne, OneToOne, PrimaryColumn, Upd
 import { Actor } from './Actor';
 import { Film } from './Film';
 
-@Entity()
+@Entity({ synchronize: false })
 export class FilmActor extends BaseEntity {
     @PrimaryColumn()
     actor_id: number; // type = Actor, ManyToOne

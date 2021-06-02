@@ -2,7 +2,7 @@ import { BaseEntity, Column, Entity, OneToMany, OneToOne, PrimaryColumn, UpdateD
 import { Field, ObjectType } from 'type-graphql';
 import { FilmActor } from './FilmActor';
 
-@Entity()
+@Entity({ synchronize: false })
 @ObjectType()
 export class Actor extends BaseEntity {
     @PrimaryColumn()
