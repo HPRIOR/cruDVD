@@ -1,12 +1,15 @@
-import { BaseEntity, Column, Entity, OneToOne, PrimaryColumn, UpdateDateColumn } from 'typeorm';
+import { BaseEntity, Column, Entity, OneToMany, OneToOne, PrimaryColumn, UpdateDateColumn } from 'typeorm';
 import { Field, ObjectType } from 'type-graphql';
+import { FilmActor } from './FilmActor';
 
 @Entity()
 @ObjectType()
 export class Actor extends BaseEntity {
     @PrimaryColumn()
-    @OneToOne(() => Actor, actor => actor.actor_id)
     actor_id: number;
+
+    @OneToMany(() => FilmActor, filmActor => filmActor.actor)
+    film_actor: FilmActor;
 
     @Column()
     @Field({ nullable: true })

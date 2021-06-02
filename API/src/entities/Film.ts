@@ -1,4 +1,4 @@
-import { BaseEntity, Column, Entity, OneToOne, PrimaryColumn, UpdateDateColumn } from 'typeorm';
+import { BaseEntity, Column, Entity, OneToMany, OneToOne, PrimaryColumn, UpdateDateColumn } from 'typeorm';
 import { Field, Float, ID, Int, ObjectType } from 'type-graphql';
 import { FilmCategory } from './FilmCategory';
 import { FilmActor } from './FilmActor';
@@ -8,7 +8,6 @@ import { Language } from './Language';
 @Entity()
 export class Film extends BaseEntity {
     @Field(() => ID)
-    @OneToOne(() => FilmActor, filmActor => filmActor.film_id) // new field with type FilmActor[], OneToMany
     @PrimaryColumn('integer')
     film_id: number;
 
@@ -63,4 +62,7 @@ export class Film extends BaseEntity {
 
     @OneToOne(() => FilmCategory, filmCat => filmCat.film)
     film_category: FilmCategory;
+
+    @OneToMany(() => FilmActor, filmActor => filmActor.film)
+    film_actor: FilmActor;
 }
