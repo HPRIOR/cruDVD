@@ -119,7 +119,6 @@ describe('userResolver', function () {
                 source: checkLoginQuery,
                 contextValue: { req: { userId: null }, user: user },
             });
-            console.log(loggedIn.data);
             expect(loggedIn.data?.checkLogin.id).toBeDefined();
             expect(loggedIn.data?.checkLogin.username).toBe('test-user');
         });
