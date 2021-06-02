@@ -109,17 +109,18 @@ describe('userResolver', function () {
         });
 
         it('should return user when in context', async () => {
-            const gqlResponse = new User();
-            gqlResponse.id = '1';
-            gqlResponse.count = 0;
-            gqlResponse.email = 'test.test@test.com';
-            gqlResponse.username = 'test-user';
-            gqlResponse.password = 'test-pass';
+            const user = new User();
+            user.id = 1;
+            user.count = 0;
+            user.email = 'test.test@test.com';
+            user.username = 'test-user';
+            user.password = 'test-pass';
             const loggedIn = await testGqlCall({
                 source: checkLoginQuery,
-                contextValue: { req: { userId: null }, user: gqlResponse },
+                contextValue: { req: { userId: null }, user: user },
             });
-            expect(loggedIn.data?.checkLogin.id).toBe('1');
+            console.log(loggedIn.data);
+            expect(loggedIn.data?.checkLogin.id).toBeDefined();
             expect(loggedIn.data?.checkLogin.username).toBe('test-user');
         });
 

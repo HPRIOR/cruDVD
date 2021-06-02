@@ -51,7 +51,6 @@ export class UserResolver {
         if (errorsExist) return { errors: errors };
         const encryptedPassword = await argon2.hash(input.password);
         const user = await User.create({
-            id: uuid(),
             username: input.username,
             email: input.email,
             password: encryptedPassword,
