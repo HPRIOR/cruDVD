@@ -14,7 +14,8 @@ describe('userResolver', function () {
     });
     afterEach(async () => {
         await getConnection().query(`
-            DELETE from "user"
+            DELETE
+            from "user"
             Where true;
         `);
     });
@@ -56,6 +57,7 @@ describe('userResolver', function () {
     `;
 
     const cookieFuncStub = (a: string, b: string) => [a, b];
+
     async function registerUser(
         cookieFunc: (a: string, b: string) => string[] = cookieFuncStub,
         input: { username?: string; password?: string; email?: string } = {
@@ -78,6 +80,7 @@ describe('userResolver', function () {
             },
         });
     }
+
     describe('Check login', () => {
         it('should return null when user and req is undefined', async () => {
             const loggedIn = await testGqlCall({
@@ -109,17 +112,17 @@ describe('userResolver', function () {
         });
 
         it('should return user when in context', async () => {
-            const gqlResponse = new User();
-            gqlResponse.id = '1';
-            gqlResponse.count = 0;
-            gqlResponse.email = 'test.test@test.com';
-            gqlResponse.username = 'test-user';
-            gqlResponse.password = 'test-pass';
+            const user = new User();
+            user.id = 1;
+            user.count = 0;
+            user.email = 'test.test@test.com';
+            user.username = 'test-user';
+            user.password = 'test-pass';
             const loggedIn = await testGqlCall({
                 source: checkLoginQuery,
-                contextValue: { req: { userId: null }, user: gqlResponse },
+                contextValue: { req: { userId: null }, user: user },
             });
-            expect(loggedIn.data?.checkLogin.id).toBe('1');
+            expect(loggedIn.data?.checkLogin.id).toBeDefined();
             expect(loggedIn.data?.checkLogin.username).toBe('test-user');
         });
 
@@ -152,6 +155,17 @@ describe('userResolver', function () {
             const gqlResponse = await registerUser();
             const dbUser = await User.findOne({ id: gqlResponse.data?.register.user.id });
             expect(dbUser?.count).toBe(0);
+        });
+        it('should return a user with a createdAt column', async () => {
+            const gqlResponse = await registerUser();
+            const dbUser = await User.findOne({ id: gqlResponse.data?.register.user.id });
+            expect(dbUser?.createdAt).toBeDefined();
+        });
+
+        it('should return a user with a updatedAt column', async () => {
+            const gqlResponse = await registerUser();
+            const dbUser = await User.findOne({ id: gqlResponse.data?.register.user.id });
+            expect(dbUser?.updatedAt).toBeDefined();
         });
         it('should call cookie creating function twice', async () => {
             const mockCallback = jest.fn((a: string, b: string) => [a, b]);

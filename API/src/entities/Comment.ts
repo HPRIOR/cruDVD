@@ -1,22 +1,33 @@
-import { BaseEntity, Column, CreateDateColumn, Entity, OneToOne, PrimaryColumn, UpdateDateColumn } from 'typeorm';
-import { Field, ObjectType } from 'type-graphql';
+import {
+    BaseEntity,
+    Column,
+    CreateDateColumn,
+    Entity,
+    JoinColumn,
+    ManyToOne,
+    OneToOne,
+    PrimaryColumn,
+    PrimaryGeneratedColumn,
+    UpdateDateColumn,
+} from 'typeorm';
+import { Field, ID, ObjectType } from 'type-graphql';
 import { Film } from './Film';
+import { User } from './User';
 
 @Entity()
 @ObjectType()
 export class Comment extends BaseEntity {
-    @Field()
-    @PrimaryColumn()
-    comment_id!: string;
+    @Field(() => ID)
+    @PrimaryGeneratedColumn()
+    comment_id!: number;
 
     @Field()
-    @OneToOne(() => Film, film => film.film_id)
     @Column()
     film_id!: number; // type Film
 
-    @Field()
-    @Column()
-    user_id!: string;
+    @JoinColumn({ name: 'film_id' })
+    @OneToOne(() => Film, film => film.film_id)
+    film: Film;
 
     @Field()
     @Column()
@@ -29,4 +40,12 @@ export class Comment extends BaseEntity {
     @Field(() => String)
     @CreateDateColumn()
     createdAt!: Date;
+
+    @Column()
+    @Field(() => ID)
+    user_id: number;
+
+    @JoinColumn({ name: 'user_id' })
+    @ManyToOne(() => User, user => user.comment)
+    user: User;
 }

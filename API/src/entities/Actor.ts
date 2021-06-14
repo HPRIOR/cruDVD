@@ -2,14 +2,14 @@ import { BaseEntity, Column, Entity, OneToMany, OneToOne, PrimaryColumn, UpdateD
 import { Field, ObjectType } from 'type-graphql';
 import { FilmActor } from './FilmActor';
 
-@Entity()
+@Entity({ synchronize: false })
 @ObjectType()
 export class Actor extends BaseEntity {
     @PrimaryColumn()
     actor_id: number;
 
     @OneToMany(() => FilmActor, filmActor => filmActor.actor)
-    film_actor: FilmActor;
+    film_actor: FilmActor[];
 
     @Column()
     @Field({ nullable: true })

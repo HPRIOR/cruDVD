@@ -1,7 +1,7 @@
 import { BaseEntity, Column, Entity, OneToOne, PrimaryColumn, UpdateDateColumn } from 'typeorm';
 import { FilmCategory } from './FilmCategory';
 
-@Entity()
+@Entity({ synchronize: false })
 export class Category extends BaseEntity {
     @PrimaryColumn()
     category_id: number;

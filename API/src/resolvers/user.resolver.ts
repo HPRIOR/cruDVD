@@ -33,6 +33,7 @@ export class UserResolver {
             return { errors: [error] };
         }
         const { accessToken, refreshToken } = generateTokens(user);
+
         context.res.cookie('access-token', accessToken);
         context.res.cookie('refresh-token', refreshToken);
         return { user };
@@ -51,7 +52,6 @@ export class UserResolver {
         if (errorsExist) return { errors: errors };
         const encryptedPassword = await argon2.hash(input.password);
         const user = await User.create({
-            id: uuid(),
             username: input.username,
             email: input.email,
             password: encryptedPassword,
@@ -61,6 +61,7 @@ export class UserResolver {
         const { accessToken, refreshToken } = generateTokens(user);
         context.res.cookie('access-token', accessToken);
         context.res.cookie('refresh-token', refreshToken);
+
         return { user };
     }
 
@@ -92,9 +93,6 @@ export class UserResolver {
     async checkLogin(@Ctx() context: any) {
         if (context.user) {
             return context.user;
-        }
-        if (!context.req.userId) {
-            return null;
         }
         const user = await User.findOne({ where: { id: context.req.userId } });
         return user ? user : null;

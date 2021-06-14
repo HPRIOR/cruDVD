@@ -1,12 +1,21 @@
-import { BaseEntity, Column, Entity, PrimaryColumn } from 'typeorm';
-import { Field, ObjectType } from 'type-graphql';
+import {
+    BaseEntity,
+    Column,
+    CreateDateColumn,
+    Entity,
+    OneToMany,
+    PrimaryGeneratedColumn,
+    UpdateDateColumn,
+} from 'typeorm';
+import { Field, ID, ObjectType } from 'type-graphql';
+import { Comment } from './Comment';
 
 @Entity()
 @ObjectType()
 export class User extends BaseEntity {
-    @PrimaryColumn()
-    @Field()
-    id!: string;
+    @PrimaryGeneratedColumn()
+    @Field(() => ID)
+    id!: number;
 
     @Column({ unique: true })
     @Field()
@@ -22,7 +31,12 @@ export class User extends BaseEntity {
     @Column({ default: 0 })
     count: number;
 
-    //TODO updated at
+    @UpdateDateColumn()
+    updatedAt: Date;
 
-    //TODO created at
+    @CreateDateColumn()
+    createdAt: Date;
+
+    @OneToMany(() => Comment, comment => comment.user)
+    comment: Comment[];
 }

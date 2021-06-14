@@ -2,7 +2,7 @@ import { BaseEntity, Column, Entity, JoinColumn, OneToOne, PrimaryColumn, Update
 import { FilmActor } from './FilmActor';
 import { Film } from './Film';
 
-@Entity()
+@Entity({ synchronize: false })
 export class Language extends BaseEntity {
     @PrimaryColumn()
     language_id: number;

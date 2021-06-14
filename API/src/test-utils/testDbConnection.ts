@@ -8,7 +8,7 @@ export const testDbConnection = () => {
         username: 'postgres',
         password: 'postgres',
         database: 'crudDVDTestDB',
-        synchronize: false,
+        synchronize: true,
         entities: [__dirname + '/../entities/*.*'],
     });
 };
