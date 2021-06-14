@@ -12,6 +12,7 @@ const createExpressApp = async () => {
 
     app.set('trust proxy', 1);
 
+    app.use(cookieParser());
     app.use(
         cors({
             origin: process.env.CORS_ORIGIN,
@@ -19,11 +20,14 @@ const createExpressApp = async () => {
         })
     );
 
-    app.use(cookieParser());
+    app.use((req, res, next) => {
+        authoriseContext({ req, res });
+        next();
+    });
 
     const apolloServer = new ApolloServer({
         schema: await createSchema(),
-        context: authoriseContext,
+        context: ({ req, res }: any) => ({ req, res }),
     });
 
     apolloServer.applyMiddleware({ app, cors: false });
