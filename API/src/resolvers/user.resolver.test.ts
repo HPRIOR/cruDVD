@@ -14,7 +14,8 @@ describe('userResolver', function () {
     });
     afterEach(async () => {
         await getConnection().query(`
-            DELETE from "user"
+            DELETE
+            from "user"
             Where true;
         `);
     });
@@ -56,6 +57,7 @@ describe('userResolver', function () {
     `;
 
     const cookieFuncStub = (a: string, b: string) => [a, b];
+
     async function registerUser(
         cookieFunc: (a: string, b: string) => string[] = cookieFuncStub,
         input: { username?: string; password?: string; email?: string } = {
@@ -78,6 +80,7 @@ describe('userResolver', function () {
             },
         });
     }
+
     describe('Check login', () => {
         it('should return null when user and req is undefined', async () => {
             const loggedIn = await testGqlCall({
