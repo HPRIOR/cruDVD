@@ -66,5 +66,5 @@ export class Film extends BaseEntity {
     film_category: FilmCategory;
 
     @OneToMany(() => FilmActor, filmActor => filmActor.film)
-    film_actor: FilmActor;
+    film_actor: FilmActor[];
 }

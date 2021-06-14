@@ -3,11 +3,12 @@ import {
     Column,
     CreateDateColumn,
     Entity,
-    PrimaryColumn,
+    OneToMany,
     PrimaryGeneratedColumn,
     UpdateDateColumn,
 } from 'typeorm';
 import { Field, ID, ObjectType } from 'type-graphql';
+import { Comment } from './Comment';
 
 @Entity()
 @ObjectType()
@@ -35,4 +36,7 @@ export class User extends BaseEntity {
 
     @CreateDateColumn()
     createdAt: Date;
+
+    @OneToMany(() => Comment, comment => comment.user)
+    comment: Comment[];
 }

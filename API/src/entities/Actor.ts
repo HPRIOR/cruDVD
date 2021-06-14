@@ -9,7 +9,7 @@ export class Actor extends BaseEntity {
     actor_id: number;
 
     @OneToMany(() => FilmActor, filmActor => filmActor.actor)
-    film_actor: FilmActor;
+    film_actor: FilmActor[];
 
     @Column()
     @Field({ nullable: true })
