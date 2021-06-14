@@ -16,9 +16,9 @@ class CommentResolver {
     ): Promise<Comment | null> {
         const userId = context.req.userId || context.user?.id;
         if (parentId) {
+            // add parent to commented on relation
         }
         const comment = await Comment.create({
-            comment_id: uuid(),
             film_id: filmId,
             content: content,
             user_id: userId,
