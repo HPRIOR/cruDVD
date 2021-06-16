@@ -13,6 +13,7 @@ import {
 import { Field, ID, ObjectType } from 'type-graphql';
 import { Film } from './Film';
 import { User } from './User';
+import { CommentChild } from './CommentChild';
 
 @Entity()
 @ObjectType()
@@ -26,7 +27,7 @@ export class Comment extends BaseEntity {
     film_id!: number; // type Film
 
     @JoinColumn({ name: 'film_id' })
-    @OneToOne(() => Film, film => film.film_id)
+    @ManyToOne(() => Film, film => film.film_id)
     film: Film;
 
     @Field()
@@ -48,4 +49,10 @@ export class Comment extends BaseEntity {
     @JoinColumn({ name: 'user_id' })
     @ManyToOne(() => User, user => user.comment)
     user: User;
+
+    @OneToOne(() => CommentChild, commentChild => commentChild.child_id)
+    child: CommentChild;
+
+    @OneToOne(() => CommentChild, commentChild => commentChild.parent_id)
+    parent: CommentChild;
 }

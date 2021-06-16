@@ -1,8 +1,8 @@
 import { Arg, Ctx, Mutation, Resolver, UseMiddleware } from 'type-graphql';
 import { Comment } from '../entities/Comment';
-import { v4 as uuid } from 'uuid';
 import { isAuth } from '../utils/auth/authMiddleWare';
 import { ContextType } from '../types/contextType';
+import { CommentChild } from '../entities/CommentChild';
 
 @Resolver()
 class CommentResolver {
@@ -12,12 +12,9 @@ class CommentResolver {
         @Ctx() context: ContextType,
         @Arg('content') content: string,
         @Arg('filmId') filmId: number,
-        @Arg('parentId', { nullable: true }) parentId: string
+        @Arg('parentId', { nullable: true }) parentId: number
     ): Promise<Comment | null> {
         const userId = context.req.userId || context.user?.id;
-        if (parentId) {
-            // add parent to commented on relation
-        }
         const comment = await Comment.create({
             film_id: filmId,
             content: content,
@@ -25,6 +22,16 @@ class CommentResolver {
             createdAt: new Date(),
             updatedAt: new Date(),
         }).save();
+
+        if (parentId) {
+            const parentComment = await Comment.findOne({ where: { comment_id: parentId } });
+            if (parentComment) {
+                const commentChild = new CommentChild();
+                commentChild.child = comment;
+                commentChild.parent = parentComment;
+                await commentChild.save();
+            }
+        }
         return comment || null;
     }
 }
