@@ -1,10 +1,10 @@
-import { Arg, Ctx, Mutation, Resolver, UseMiddleware } from 'type-graphql';
+import { Arg, Ctx, Mutation, Query, Resolver, UseMiddleware } from 'type-graphql';
 import { Comment } from '../entities/Comment';
 import { isAuth } from '../utils/auth/authMiddleWare';
 import { ContextType } from '../types/contextType';
 import { Reply } from '../entities/Reply';
 
-@Resolver()
+@Resolver(() => Comment)
 class CommentResolver {
     @UseMiddleware(isAuth)
     @Mutation(() => Comment, { nullable: true })
@@ -31,6 +31,13 @@ class CommentResolver {
             }
         }
         return comment || null;
+    }
+
+    @UseMiddleware(isAuth)
+    @Query(() => [Comment], { nullable: true })
+    async getCommentsById(@Arg('film_id') film_id: number): Promise<Comment[] | null> {
+        const comments = await Comment.find({ where: { film_id } });
+        return comments ? comments : null;
     }
 }
 

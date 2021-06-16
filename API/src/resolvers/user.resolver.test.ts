@@ -306,7 +306,6 @@ describe('userResolver', function () {
 
         it('should return false when no user logged in', async () => {
             const logout = await logoutMut();
-            console.log(logout.data?.logout);
             expect(logout.data?.logout).toBe(false);
         });
     });

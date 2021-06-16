@@ -51,6 +51,7 @@ describe('Comment resolver', () => {
     afterEach(async () => {
         await clearCommentTables();
     });
+
     const createCommentMut = `
             mutation CreateComment($content: String!, $filmId: Float!, $parentId: Float){
                 createComment(content: $content, filmId: $filmId, parentId: $parentId){
@@ -102,7 +103,6 @@ describe('Comment resolver', () => {
                 user: null,
             }
         );
-        console.log(comment.data);
         expect(comment.data?.createComment.content).toBe('this is a new comment');
     });
 
@@ -163,5 +163,40 @@ describe('Comment resolver', () => {
         const childCommentInDb = await Reply.findOne({ where: { parent_id: parentCommentId } });
 
         expect(childCommentInDb).toBeDefined();
+    });
+
+    it('should be able to create two child comments on one parent', async () => {
+        await createComment(
+            { filmId: 1, content: 'this is a parent comment', parentId: null },
+            {
+                req: { userId: 1 },
+                user: null,
+            }
+        );
+
+        const parentComment = await Comment.findOne({ where: { content: 'this is a parent comment' } });
+        const parentCommentId = parentComment!.comment_id;
+
+        await createComment(
+            { filmId: 1, content: 'this is a child comment', parentId: parentCommentId },
+            {
+                req: { userId: 1 },
+                user: null,
+            }
+        );
+        await createComment(
+            { filmId: 1, content: 'this is another child comment', parentId: parentCommentId },
+            {
+                req: { userId: 1 },
+                user: null,
+            }
+        );
+
+        const childCommentInDb = await Reply.find({ where: { parent_id: parentCommentId } });
+
+        expect(childCommentInDb.length).toBe(2);
+    });
+    describe('getCommentsByFilmID', () => {
+        it('should getCommentsByFilmId', () => {});
     });
 });
