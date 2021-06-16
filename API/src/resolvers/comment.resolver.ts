@@ -2,7 +2,7 @@ import { Arg, Ctx, Mutation, Resolver, UseMiddleware } from 'type-graphql';
 import { Comment } from '../entities/Comment';
 import { isAuth } from '../utils/auth/authMiddleWare';
 import { ContextType } from '../types/contextType';
-import { CommentChild } from '../entities/CommentChild';
+import { Reply } from '../entities/Reply';
 
 @Resolver()
 class CommentResolver {
@@ -26,9 +26,7 @@ class CommentResolver {
         if (parentId) {
             const parentComment = await Comment.findOne({ where: { comment_id: parentId } });
             if (parentComment) {
-                const commentChild = new CommentChild();
-                commentChild.child = comment;
-                commentChild.parent = parentComment;
+                const commentChild = new Reply(parentComment, comment);
                 await commentChild.save();
             }
         }

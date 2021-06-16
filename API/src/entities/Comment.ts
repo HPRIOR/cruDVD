@@ -6,14 +6,13 @@ import {
     JoinColumn,
     ManyToOne,
     OneToOne,
-    PrimaryColumn,
     PrimaryGeneratedColumn,
     UpdateDateColumn,
 } from 'typeorm';
 import { Field, ID, ObjectType } from 'type-graphql';
 import { Film } from './Film';
 import { User } from './User';
-import { CommentChild } from './CommentChild';
+import { Reply } from './Reply';
 
 @Entity()
 @ObjectType()
@@ -50,9 +49,9 @@ export class Comment extends BaseEntity {
     @ManyToOne(() => User, user => user.comment)
     user: User;
 
-    @OneToOne(() => CommentChild, commentChild => commentChild.child_id)
-    child: CommentChild;
+    @OneToOne(() => Reply, commentChild => commentChild.child_id)
+    child: Reply;
 
-    @OneToOne(() => CommentChild, commentChild => commentChild.parent_id)
-    parent: CommentChild;
+    @OneToOne(() => Reply, commentChild => commentChild.parent_id)
+    parent: Reply;
 }

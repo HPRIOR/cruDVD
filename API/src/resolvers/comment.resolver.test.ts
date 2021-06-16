@@ -4,7 +4,7 @@ import { testGqlCall } from '../test-utils/testGqlCall';
 import { Express } from 'express';
 import createExpressApp from '../config/createExpressApp';
 import { Comment } from '../entities/Comment';
-import { CommentChild } from '../entities/CommentChild';
+import { Reply } from '../entities/Reply';
 
 describe('Comment resolver', () => {
     let dbConn: Connection;
@@ -13,7 +13,7 @@ describe('Comment resolver', () => {
     const clearCommentTables = async () => {
         await getConnection().query(`
             DELETE
-            from "crudDVDTestDB".public."comment_child"
+            from "crudDVDTestDB".public."reply"
             Where true;
         `);
         await getConnection().query(`
@@ -160,7 +160,7 @@ describe('Comment resolver', () => {
             }
         );
 
-        const childCommentInDb = await CommentChild.findOne({ where: { parent_id: parentCommentId } });
+        const childCommentInDb = await Reply.findOne({ where: { parent_id: parentCommentId } });
 
         expect(childCommentInDb).toBeDefined();
     });
