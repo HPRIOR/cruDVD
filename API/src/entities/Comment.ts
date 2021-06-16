@@ -5,6 +5,7 @@ import {
     Entity,
     JoinColumn,
     ManyToOne,
+    OneToMany,
     OneToOne,
     PrimaryGeneratedColumn,
     UpdateDateColumn,
@@ -49,9 +50,9 @@ export class Comment extends BaseEntity {
     @ManyToOne(() => User, user => user.comment)
     user: User;
 
-    @OneToOne(() => Reply, commentChild => commentChild.child_id)
+    @OneToMany(() => Reply, reply => reply.child_id)
     child: Reply;
 
-    @OneToOne(() => Reply, commentChild => commentChild.parent_id)
+    @OneToMany(() => Reply, reply => reply.parent_id)
     parent: Reply;
 }

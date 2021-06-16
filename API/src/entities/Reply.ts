@@ -1,4 +1,4 @@
-import { BaseEntity, Column, Entity, JoinColumn, OneToOne, PrimaryColumn } from 'typeorm';
+import { BaseEntity, Column, Entity, JoinColumn, ManyToOne, OneToMany, OneToOne, PrimaryColumn } from 'typeorm';
 import { Comment } from './Comment';
 import { Category } from './Category';
 import { Film } from './Film';
@@ -13,12 +13,12 @@ export class Reply extends BaseEntity {
     @PrimaryColumn()
     parent_id!: number;
     @JoinColumn({ name: 'parent_id' })
-    @OneToOne(() => Comment, comment => comment.comment_id)
+    @ManyToOne(() => Comment, comment => comment.comment_id)
     parent: Comment;
 
     @PrimaryColumn()
     child_id!: number;
     @JoinColumn({ name: 'child_id' })
-    @OneToOne(() => Comment, comment => comment.comment_id)
+    @ManyToOne(() => Comment, comment => comment.comment_id)
     child: Comment;
 }
