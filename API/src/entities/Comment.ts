@@ -51,8 +51,8 @@ export class Comment extends BaseEntity {
     user: User;
 
     @OneToMany(() => Reply, reply => reply.child_id)
-    child: Reply;
+    child: Reply[];
 
     @OneToMany(() => Reply, reply => reply.parent_id)
-    parent: Reply;
+    parent: Reply[];
 }
