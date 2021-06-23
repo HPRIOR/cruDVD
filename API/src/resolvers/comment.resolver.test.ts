@@ -73,7 +73,7 @@ describe('Comment resolver', () => {
             }
         `;
 
-    const getCommentByFilmIdQueryWithChild = `
+    const getCommentByFilmIdQueryWithReply = `
              query GetCommentsByFilmId($filmId: Float!){
                 getCommentsByFilmId(filmId: $filmId){
                     comment_id
@@ -89,9 +89,9 @@ describe('Comment resolver', () => {
             }
         `;
 
-    const getChildrenOfCommentQuery = `
-             query GetChildrenOfCommentQuery($commentId: Float!){
-                getChildrenOfComment(commentId: $commentId){
+    const getRepliesOfCommentQuery = `
+             query GetRepliesOfCommentQuery($commentId: Float!){
+                getRepliesOfComment(commentId: $commentId){
                     comment_id
                     film_id
                     content
@@ -119,14 +119,14 @@ describe('Comment resolver', () => {
     type getChildrenOfComment = { commentId: number };
     const getChildrenOfComment = async (vars: getChildrenOfComment, context: any = {}) =>
         await testGqlCall({
-            source: getChildrenOfCommentQuery,
+            source: getRepliesOfCommentQuery,
             variableValues: vars,
             contextValue: context,
         });
 
     const getCommentByFilmIdWithChildren = async (vars: getCommentByFilmIdVariables, context: any = {}) =>
         await testGqlCall({
-            source: getCommentByFilmIdQueryWithChild,
+            source: getCommentByFilmIdQueryWithReply,
             variableValues: vars,
             contextValue: context,
         });
@@ -322,7 +322,7 @@ describe('Comment resolver', () => {
                 }
             );
             const children = await getChildrenOfComment({ commentId: parentCommentId });
-            expect(children.data?.getChildrenOfComment.length).toBe(1);
+            expect(children.data?.getRepliesOfComment.length).toBe(1);
         });
     });
 });

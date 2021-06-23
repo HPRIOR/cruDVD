@@ -52,7 +52,7 @@ class CommentResolver {
     }
 
     @Query(() => [Comment], { nullable: true })
-    async getChildrenOfComment(@Arg('commentId') commentId: number): Promise<Comment[] | null> {
+    async getRepliesOfComment(@Arg('commentId') commentId: number): Promise<Comment[] | null> {
         const children = await getConnection()
             .getRepository(Comment)
             .createQueryBuilder('c')
