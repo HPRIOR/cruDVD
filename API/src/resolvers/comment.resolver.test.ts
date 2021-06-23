@@ -62,11 +62,71 @@ describe('Comment resolver', () => {
                 }
             }
         `;
+    const getCommentByFilmIdQuery = `
+             query GetCommentsByFilmId($filmId: Float!){
+                getCommentsByFilmId(filmId: $filmId){
+                    comment_id
+                    film_id
+                    content
+                    user_id
+                }
+            }
+        `;
 
-    type variables = { filmId: number; parentId: number | null; content: string };
-    const createComment = async (vars: variables, context: any = {}) =>
+    const getCommentByFilmIdQueryWithChild = `
+             query GetCommentsByFilmId($filmId: Float!){
+                getCommentsByFilmId(filmId: $filmId){
+                    comment_id
+                    film_id
+                    content
+                    user_id
+                    children{
+                        comment_id
+                        content
+                        user_id
+                    }
+                }
+            }
+        `;
+
+    const getChildrenOfCommentQuery = `
+             query GetChildrenOfCommentQuery($commentId: Float!){
+                getChildrenOfComment(commentId: $commentId){
+                    comment_id
+                    film_id
+                    content
+                    user_id
+                }
+            }
+        `;
+
+    type createCommentVariables = { filmId: number; parentId: number | null; content: string };
+    const createComment = async (vars: createCommentVariables, context: any = {}) =>
         await testGqlCall({
             source: createCommentMut,
+            variableValues: vars,
+            contextValue: context,
+        });
+
+    type getCommentByFilmIdVariables = { filmId: number };
+    const getCommentByFilmId = async (vars: getCommentByFilmIdVariables, context: any = {}) =>
+        await testGqlCall({
+            source: getCommentByFilmIdQuery,
+            variableValues: vars,
+            contextValue: context,
+        });
+
+    type getChildrenOfComment = { commentId: number };
+    const getChildrenOfComment = async (vars: getChildrenOfComment, context: any = {}) =>
+        await testGqlCall({
+            source: getChildrenOfCommentQuery,
+            variableValues: vars,
+            contextValue: context,
+        });
+
+    const getCommentByFilmIdWithChildren = async (vars: getCommentByFilmIdVariables, context: any = {}) =>
+        await testGqlCall({
+            source: getCommentByFilmIdQueryWithChild,
             variableValues: vars,
             contextValue: context,
         });
@@ -196,7 +256,73 @@ describe('Comment resolver', () => {
 
         expect(childCommentInDb.length).toBe(2);
     });
+
     describe('getCommentsByFilmID', () => {
-        it('should getCommentsByFilmId', () => {});
+        it('should get comments by film ID', async () => {
+            await createComment(
+                { filmId: 1, content: 'this is a child comment', parentId: null },
+                {
+                    req: { userId: 1 },
+                    user: null,
+                }
+            );
+            let comments = await getCommentByFilmId({ filmId: 1 });
+            expect(comments.data?.getCommentsByFilmId.length).toBe(1);
+        });
+
+        it('should get children of comment', async () => {
+            await createComment(
+                { filmId: 1, content: 'this is a parent comment', parentId: null },
+                {
+                    req: { userId: 1 },
+                    user: null,
+                }
+            );
+
+            const parentComment = await Comment.findOne({ where: { content: 'this is a parent comment' } });
+            const parentCommentId = parentComment!.comment_id;
+
+            await createComment(
+                { filmId: 1, content: 'this is a child comment', parentId: parentCommentId },
+                {
+                    req: { userId: 1 },
+                    user: null,
+                }
+            );
+            await createComment(
+                { filmId: 1, content: 'this is another child comment', parentId: parentCommentId },
+                {
+                    req: { userId: 1 },
+                    user: null,
+                }
+            );
+            let comments = await getCommentByFilmIdWithChildren({ filmId: 1 });
+            expect(comments.data?.getCommentsByFilmId[0].children.length).toBe(2);
+        });
+    });
+
+    describe('getChildrenOfComment', () => {
+        it('should get children of comment', async () => {
+            await createComment(
+                { filmId: 1, content: 'this is a parent comment', parentId: null },
+                {
+                    req: { userId: 1 },
+                    user: null,
+                }
+            );
+
+            const parentComment = await Comment.findOne({ where: { content: 'this is a parent comment' } });
+            const parentCommentId = parentComment!.comment_id;
+
+            await createComment(
+                { filmId: 1, content: 'this is a child comment', parentId: parentCommentId },
+                {
+                    req: { userId: 1 },
+                    user: null,
+                }
+            );
+            const children = await getChildrenOfComment({ commentId: parentCommentId });
+            expect(children.data?.getChildrenOfComment.length).toBe(1);
+        });
     });
 });

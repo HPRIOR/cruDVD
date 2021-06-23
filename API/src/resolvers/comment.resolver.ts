@@ -1,11 +1,23 @@
-import { Arg, Ctx, Mutation, Query, Resolver, UseMiddleware } from 'type-graphql';
+import { Arg, Ctx, FieldResolver, Mutation, Query, Resolver, Root, UseMiddleware } from 'type-graphql';
 import { Comment } from '../entities/Comment';
 import { isAuth } from '../utils/auth/authMiddleWare';
 import { ContextType } from '../types/contextType';
 import { Reply } from '../entities/Reply';
+import { getConnection } from 'typeorm';
 
 @Resolver(() => Comment)
 class CommentResolver {
+    @FieldResolver(() => [Comment], { nullable: true })
+    async children(@Root() comment: Comment): Promise<Comment[] | null> {
+        const children = await getConnection()
+            .getRepository(Comment)
+            .createQueryBuilder('c')
+            .leftJoin(Reply, 'r', 'c."comment_id" = r."child_id"')
+            .where('r."parent_id" = :comment_id', { comment_id: comment.comment_id })
+            .getMany();
+        return children || null;
+    }
+
     @UseMiddleware(isAuth)
     @Mutation(() => Comment, { nullable: true })
     async createComment(
@@ -33,11 +45,22 @@ class CommentResolver {
         return comment || null;
     }
 
-    @UseMiddleware(isAuth)
     @Query(() => [Comment], { nullable: true })
-    async getCommentsById(@Arg('film_id') film_id: number): Promise<Comment[] | null> {
-        const comments = await Comment.find({ where: { film_id } });
+    async getCommentsByFilmId(@Arg('filmId') filmId: number): Promise<Comment[] | null> {
+        const comments = await Comment.find({ where: { film_id: filmId } });
         return comments ? comments : null;
+    }
+
+    @Query(() => [Comment], { nullable: true })
+    async getChildrenOfComment(@Arg('commentId') commentId: number): Promise<Comment[] | null> {
+        const children = await getConnection()
+            .getRepository(Comment)
+            .createQueryBuilder('c')
+            .leftJoin(Reply, 'r', 'c."comment_id" = r."child_id"')
+            .where('r."parent_id" = :comment_id', { comment_id: commentId })
+            .getMany();
+
+        return children || null;
     }
 }
 
