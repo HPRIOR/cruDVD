@@ -2,13 +2,31 @@
 
 schema {
     query: Query
+    mutation: Mutation
+}
+
+type Actor {
+    first_name: String
+    last_name: String!
+}
+
+type Comment {
+    children: [Comment!]
+    comment_id: ID!
+    content: String!
+    createdAt: String!
+    film_id: Float!
+    updatedAt: String!
+    user_id: ID!
 }
 
 type Film {
+    actors: [Actor!]
     category: String
     description: String!
     film_id: ID!
     fulltext: String!
+    language: String
     language_id: Int!
     last_update: String!
     length: Int!
@@ -22,10 +40,12 @@ type Film {
 }
 
 type FilmWithCategory {
+    actors: [Actor!]
     category: String
     description: String!
     film_id: ID!
     fulltext: String!
+    language: String
     language_id: Int!
     last_update: String!
     length: Int!
@@ -39,8 +59,43 @@ type FilmWithCategory {
     title: String!
 }
 
+type Mutation {
+    createComment(content: String!, filmId: Float!, parentId: Float): Comment
+    login(input: RegisterInput!): UserResponse
+    logout: Boolean!
+    register(input: RegisterInput!): UserResponse!
+}
+
 type Query {
+    checkLogin: User
+    getAllFilms: [Film!]!
+    getChildrenOfComment(commentId: Float!): [Comment!]
+    getCommentsByFilmId(filmId: Float!): [Comment!]
     getFilmByTitle(title: String!): Film
     getFilmsByCategory(categoryName: String!): [FilmWithCategory!]
     hello: String!
+}
+
+type User {
+    email: String!
+    id: ID!
+    username: String!
+}
+
+type UserResponse {
+    errors: UserResponseError
+    user: User
+}
+
+type UserResponseError {
+    emailError: [String!]
+    genericError: [String!]
+    passError: [String!]
+    userError: [String!]
+}
+
+input RegisterInput {
+    email: String!
+    password: String!
+    username: String!
 }
