@@ -48,7 +48,7 @@ class FilmResolver {
 
     @Query(() => [Film])
     async getAllFilms() {
-        return await Film.find({});
+        return Film.find({});
     }
 
     @Query(() => Film, { nullable: true })
