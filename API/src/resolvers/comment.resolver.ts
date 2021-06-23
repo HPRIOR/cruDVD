@@ -8,7 +8,7 @@ import { getConnection } from 'typeorm';
 @Resolver(() => Comment)
 class CommentResolver {
     @FieldResolver(() => [Comment], { nullable: true })
-    async children(@Root() comment: Comment): Promise<Comment[] | null> {
+    async replies(@Root() comment: Comment): Promise<Comment[] | null> {
         const children = await getConnection()
             .getRepository(Comment)
             .createQueryBuilder('c')

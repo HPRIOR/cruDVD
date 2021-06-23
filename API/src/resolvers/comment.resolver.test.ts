@@ -80,7 +80,7 @@ describe('Comment resolver', () => {
                     film_id
                     content
                     user_id
-                    children{
+                    replies{
                         comment_id
                         content
                         user_id
@@ -297,7 +297,7 @@ describe('Comment resolver', () => {
                 }
             );
             let comments = await getCommentByFilmIdWithChildren({ filmId: 1 });
-            expect(comments.data?.getCommentsByFilmId[0].children.length).toBe(2);
+            expect(comments.data?.getCommentsByFilmId[0].replies.length).toBe(2);
         });
     });
 
