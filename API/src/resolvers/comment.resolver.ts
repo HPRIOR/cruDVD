@@ -28,7 +28,6 @@ class CommentResolver {
             user_id: userId,
             createdAt: new Date(),
             updatedAt: new Date(),
-            //parent_id: parentId,
         }).save();
 
         if (parentId) {

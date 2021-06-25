@@ -2,10 +2,7 @@ import DataLoader from 'dataloader';
 import { Category } from '../../entities/Category';
 import { getConnection } from 'typeorm';
 import { groupBy } from 'ramda';
-
-type WithFilmId = {
-    film_id: number;
-};
+import { WithFilmId } from './types';
 
 export const createCategoryLoader = () =>
     new DataLoader<number, string>(async filmIds => {

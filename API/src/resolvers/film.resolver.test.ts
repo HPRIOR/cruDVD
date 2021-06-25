@@ -2,6 +2,7 @@ import { Connection } from 'typeorm';
 import { testGqlCall } from '../test-utils/testGqlCall';
 import { testDbConnection } from '../test-utils/testDbConnection';
 import { createCategoryLoader } from '../utils/loaders/categoryLoader';
+import { createActorLoader } from '../utils/loaders/actorLoader';
 
 describe('filmResolver', function () {
     let dbConn: Connection;
@@ -49,7 +50,7 @@ describe('filmResolver', function () {
             testGqlCall({
                 source: getFilmQuery,
                 variableValues: { title: 'Aladdin Calendar' },
-                contextValue: { loaders: { categoryLoader: createCategoryLoader() } },
+                contextValue: { loaders: { categoryLoader: createCategoryLoader(), actorLoader: createActorLoader() } },
             });
 
         it('should return data', async () => {
@@ -78,7 +79,7 @@ describe('filmResolver', function () {
             expect(category).toBe('Sports');
         });
         it('should return correct number of actors', async () => {
-            const filmData = await getFilmData();
+            const filmData = await getFilmDataWithContextLoaders();
             const actors = filmData.data?.getFilmByTitle.actors;
             expect(actors?.length).toBe(8);
         });

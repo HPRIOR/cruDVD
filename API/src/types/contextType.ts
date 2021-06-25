@@ -1,5 +1,6 @@
 import { User } from '../entities/User';
 import DataLoader from 'dataloader';
+import { Actor } from '../entities/Actor';
 
 export type ContextType = {
     req: any;
@@ -11,5 +12,6 @@ export type WithLoaders = {
     loaders: {
         replyLoader: DataLoader<number, Comment[]>;
         categoryLoader: DataLoader<number, string[]>;
+        actorLoader: DataLoader<number, Actor[]>;
     };
 };

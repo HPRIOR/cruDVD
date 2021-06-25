@@ -8,6 +8,7 @@ import cookieParser from 'cookie-parser';
 import authoriseContext from '../utils/auth/authoriseContext';
 import { createReplyLoader } from '../utils/loaders/replyLoader';
 import { createCategoryLoader } from '../utils/loaders/categoryLoader';
+import { createActorLoader } from '../utils/loaders/actorLoader';
 
 const createExpressApp = async () => {
     const app = express();
@@ -35,6 +36,7 @@ const createExpressApp = async () => {
             loaders: {
                 replyLoader: createReplyLoader(),
                 categoryLoader: createCategoryLoader(),
+                actorLoader: createActorLoader(),
             },
         }),
     });

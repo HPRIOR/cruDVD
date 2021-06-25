@@ -22,15 +22,9 @@ class FilmResolver {
     }
 
     @FieldResolver(() => [Actor], { nullable: true })
-    async actors(@Root() film: Film): Promise<[Actor] | null> {
-        const actors = await getConnection().query(`
-            select distinct a.first_name, a.last_name, a.last_update
-            from actor a,
-                 film_actor fa
-            where fa.film_id = ${film.film_id}
-              and fa.actor_id = a.actor_id
-        `);
-        return actors || null;
+    async actors(@Root() film: Film, @Ctx() context: ContextType & WithLoaders): Promise<Actor[] | null> {
+        const loader = context.loaders.actorLoader;
+        return loader.load(film.film_id);
     }
 
     @FieldResolver(() => String, { nullable: true })
