@@ -1,9 +1,10 @@
-import { Arg, Field, FieldResolver, ObjectType, Query, Resolver, Root } from 'type-graphql';
+import { Arg, Ctx, Field, FieldResolver, ObjectType, Query, Resolver, Root } from 'type-graphql';
 import { Film } from '../entities/Film';
 import { Category } from '../entities/Category';
 import { getConnection } from 'typeorm';
 import { Actor } from '../entities/Actor';
 import { FilmCategory } from '../entities/FilmCategory';
+import { ContextType, WithLoaders } from '../types/contextType';
 
 @ObjectType()
 class FilmWithCategory extends Film {
@@ -15,14 +16,9 @@ class FilmWithCategory extends Film {
 class FilmResolver {
     // root object in field resolver is the current object being queried by the resolver - the current film
     @FieldResolver(() => String, { nullable: true })
-    async category(@Root() film: Film): Promise<string | null> {
-        const category = await getConnection()
-            .getRepository(Category)
-            .createQueryBuilder('c')
-            .leftJoin(FilmCategory, 'fc', 'fc."category_id" = c."category_id"')
-            .where('fc."film_id" = :film_id', { film_id: film.film_id })
-            .getOne();
-        return category?.name || null;
+    async category(@Root() film: Film, @Ctx() context: ContextType & WithLoaders) {
+        const loader = context.loaders.categoryLoader;
+        return loader.load(film.film_id);
     }
 
     @FieldResolver(() => [Actor], { nullable: true })

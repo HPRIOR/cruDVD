@@ -1,6 +1,7 @@
 import { Connection } from 'typeorm';
 import { testGqlCall } from '../test-utils/testGqlCall';
 import { testDbConnection } from '../test-utils/testDbConnection';
+import { createCategoryLoader } from '../utils/loaders/categoryLoader';
 
 describe('filmResolver', function () {
     let dbConn: Connection;
@@ -44,6 +45,13 @@ describe('filmResolver', function () {
                 variableValues: { title: 'Aladdin Calendar' },
             });
 
+        const getFilmDataWithContextLoaders = () =>
+            testGqlCall({
+                source: getFilmQuery,
+                variableValues: { title: 'Aladdin Calendar' },
+                contextValue: { loaders: { categoryLoader: createCategoryLoader() } },
+            });
+
         it('should return data', async () => {
             const filmData = await getFilmData();
             expect(filmData.data).toBeDefined();
@@ -65,7 +73,7 @@ describe('filmResolver', function () {
             expect(title).toBe('2006');
         });
         it('should return correct category data', async () => {
-            const filmData = await getFilmData();
+            const filmData = await getFilmDataWithContextLoaders();
             const category = filmData.data?.getFilmByTitle.category;
             expect(category).toBe('Sports');
         });

@@ -10,5 +10,6 @@ export type ContextType = {
 export type WithLoaders = {
     loaders: {
         replyLoader: DataLoader<number, Comment[]>;
+        categoryLoader: DataLoader<number, string[]>;
     };
 };

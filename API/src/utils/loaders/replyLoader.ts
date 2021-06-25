@@ -9,7 +9,6 @@ export type WithParentId = {
 
 export const createReplyLoader = () =>
     new DataLoader<number, Comment[]>(async commentIds => {
-        console.log('hello');
         const replies = (await getConnection().query(
             `
             select c.*, r.parent_id
