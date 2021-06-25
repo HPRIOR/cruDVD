@@ -280,8 +280,19 @@ describe('Comment resolver', () => {
                 }
             );
 
+            await createComment(
+                { filmId: 1, content: 'this is another parent comment', parentId: null },
+                {
+                    req: { userId: 1 },
+                    user: null,
+                }
+            );
+
             const parentComment = await Comment.findOne({ where: { content: 'this is a parent comment' } });
             const parentCommentId = parentComment!.comment_id;
+
+            const parentCommentAlt = await Comment.findOne({ where: { content: 'this is another parent comment' } });
+            const parentCommentAltId = parentCommentAlt!.comment_id;
 
             await createComment(
                 { filmId: 1, content: 'this is a child comment', parentId: parentCommentId },
@@ -297,12 +308,22 @@ describe('Comment resolver', () => {
                     user: null,
                 }
             );
+
+            await createComment(
+                { filmId: 1, content: 'this is a child comment of alt parent comment', parentId: parentCommentAltId },
+                {
+                    req: { userId: 1 },
+                    user: null,
+                }
+            );
             let comments = await getCommentByFilmIdWithChildren(
                 { filmId: 1 },
                 { loaders: { replyLoader: createReplyLoader() } }
             );
+
             expect(comments.data?.getCommentsByFilmId[0].replies.length).toBe(2);
             expect(comments.data?.getCommentsByFilmId[0].replies[0].content).toBe('this is a child comment');
+            expect(comments.data?.getCommentsByFilmId[0].replies[1].content).toBe('this is another child comment');
         });
     });
 
