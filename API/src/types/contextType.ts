@@ -7,7 +7,7 @@ export type ContextType = {
     user: User | null;
 };
 
-export type ContextWithLoader = {
+export type WithLoaders = {
     loaders: {
         replyLoader: DataLoader<number, Comment[]>;
     };

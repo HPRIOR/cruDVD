@@ -1,14 +1,14 @@
 import { Arg, Ctx, FieldResolver, Mutation, Query, Resolver, Root, UseMiddleware } from 'type-graphql';
 import { Comment } from '../entities/Comment';
 import { isAuth } from '../utils/auth/authMiddleWare';
-import { ContextType, ContextWithLoader } from '../types/contextType';
+import { ContextType, WithLoaders } from '../types/contextType';
 import { Reply } from '../entities/Reply';
 import { getConnection } from 'typeorm';
 
 @Resolver(() => Comment)
 class CommentResolver {
     @FieldResolver(() => [Comment], { nullable: true })
-    async replies(@Root() comment: Comment, @Ctx() context: ContextType & ContextWithLoader) {
+    async replies(@Root() comment: Comment, @Ctx() context: ContextType & WithLoaders) {
         const replyLoader = context.loaders.replyLoader;
         return replyLoader.load(comment.comment_id);
     }
