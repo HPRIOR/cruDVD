@@ -3,7 +3,7 @@ import { Film } from '../entities/Film';
 import { Category } from '../entities/Category';
 import { getConnection } from 'typeorm';
 import { Actor } from '../entities/Actor';
-import { FilmCategory } from '../entities/FilmCategory';
+import { Comment } from '../entities/Comment';
 import { ContextType, WithLoaders } from '../types/contextType';
 
 @ObjectType()
@@ -14,7 +14,13 @@ class FilmWithCategory extends Film {
 
 @Resolver(() => Film)
 class FilmResolver {
-    // root object in field resolver is the current object being queried by the resolver - the current film
+    // TODO: only those comments without a parent ID have a film ID
+    @FieldResolver(() => [Comment], { nullable: true })
+    async comments(@Root() film: Film, @Ctx() context: ContextType & WithLoaders) {
+        const loader = context.loaders.filmCommentLoader;
+        return loader.load(film.film_id);
+    }
+
     @FieldResolver(() => String, { nullable: true })
     async category(@Root() film: Film, @Ctx() context: ContextType & WithLoaders) {
         const loader = context.loaders.categoryLoader;
@@ -22,21 +28,15 @@ class FilmResolver {
     }
 
     @FieldResolver(() => [Actor], { nullable: true })
-    async actors(@Root() film: Film, @Ctx() context: ContextType & WithLoaders): Promise<Actor[] | null> {
+    async actors(@Root() film: Film, @Ctx() context: ContextType & WithLoaders) {
         const loader = context.loaders.actorLoader;
         return loader.load(film.film_id);
     }
 
     @FieldResolver(() => String, { nullable: true })
-    async language(@Root() film: Film): Promise<String | null> {
-        const langauge = await getConnection().query(`
-            select distinct l.name
-            from language l,
-                 film f
-            where l.language_id = ${film.language_id}
-            LIMIT 1;
-        `);
-        return langauge[0].name.trim() || null;
+    async language(@Root() film: Film, @Ctx() context: ContextType & WithLoaders) {
+        const loader = context.loaders.languageLoader;
+        return loader.load(film.film_id);
     }
 
     @Query(() => [Film])

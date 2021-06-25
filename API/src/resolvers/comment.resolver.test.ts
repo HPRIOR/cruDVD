@@ -352,3 +352,5 @@ describe('Comment resolver', () => {
         });
     });
 });
+
+// TODO test null values for film_id

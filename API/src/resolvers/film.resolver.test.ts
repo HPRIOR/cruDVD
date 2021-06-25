@@ -3,6 +3,7 @@ import { testGqlCall } from '../test-utils/testGqlCall';
 import { testDbConnection } from '../test-utils/testDbConnection';
 import { createCategoryLoader } from '../utils/loaders/categoryLoader';
 import { createActorLoader } from '../utils/loaders/actorLoader';
+import { createLanguageLoader } from '../utils/loaders/languageLoader';
 
 describe('filmResolver', function () {
     let dbConn: Connection;
@@ -50,7 +51,13 @@ describe('filmResolver', function () {
             testGqlCall({
                 source: getFilmQuery,
                 variableValues: { title: 'Aladdin Calendar' },
-                contextValue: { loaders: { categoryLoader: createCategoryLoader(), actorLoader: createActorLoader() } },
+                contextValue: {
+                    loaders: {
+                        categoryLoader: createCategoryLoader(),
+                        actorLoader: createActorLoader(),
+                        languageLoader: createLanguageLoader(),
+                    },
+                },
             });
 
         it('should return data', async () => {
@@ -84,9 +91,10 @@ describe('filmResolver', function () {
             expect(actors?.length).toBe(8);
         });
         it('should return correct language', async () => {
-            const filmData = await getFilmData();
+            const filmData = await getFilmDataWithContextLoaders();
             const language = filmData.data?.getFilmByTitle.language;
             expect(language).toBe('English');
         });
+        //TODO test get comments of test
     });
 });

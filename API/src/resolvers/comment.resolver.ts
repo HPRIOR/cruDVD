@@ -13,6 +13,7 @@ class CommentResolver {
         return replyLoader.load(comment.comment_id);
     }
 
+    // TODO: make film id and optional param and check for when creating a comment must have either film or parent id
     @UseMiddleware(isAuth)
     @Mutation(() => Comment, { nullable: true })
     async createComment(

@@ -8,7 +8,7 @@ export const createCategoryLoader = () =>
     new DataLoader<number, string>(async filmIds => {
         const categories: (Category & WithFilmId)[] = await getConnection().query(
             `
-            select c.*, fc.film_id
+            select c.name, fc.film_id
             from category c, film_category fc
             where c.category_id = fc.category_id
             and fc.film_id = ANY($1)

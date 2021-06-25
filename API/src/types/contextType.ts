@@ -11,7 +11,9 @@ export type ContextType = {
 export type WithLoaders = {
     loaders: {
         replyLoader: DataLoader<number, Comment[]>;
-        categoryLoader: DataLoader<number, string[]>;
+        categoryLoader: DataLoader<number, string>;
         actorLoader: DataLoader<number, Actor[]>;
+        languageLoader: DataLoader<number, string>;
+        filmCommentLoader: DataLoader<number, Comment[]>;
     };
 };
