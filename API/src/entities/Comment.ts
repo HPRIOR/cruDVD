@@ -53,6 +53,10 @@ export class Comment extends BaseEntity {
     @OneToMany(() => Reply, reply => reply.child_id)
     child: Reply[];
 
+    // @Column({ nullable: true })
+    // parent_id: number;
+
     @OneToMany(() => Reply, reply => reply.parent_id)
+    // @JoinColumn({ name: 'parent_id' })
     parent: Reply[];
 }

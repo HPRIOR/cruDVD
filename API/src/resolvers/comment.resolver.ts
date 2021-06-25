@@ -1,21 +1,16 @@
 import { Arg, Ctx, FieldResolver, Mutation, Query, Resolver, Root, UseMiddleware } from 'type-graphql';
 import { Comment } from '../entities/Comment';
 import { isAuth } from '../utils/auth/authMiddleWare';
-import { ContextType } from '../types/contextType';
+import { ContextType, ContextWithLoader } from '../types/contextType';
 import { Reply } from '../entities/Reply';
 import { getConnection } from 'typeorm';
 
 @Resolver(() => Comment)
 class CommentResolver {
     @FieldResolver(() => [Comment], { nullable: true })
-    async replies(@Root() comment: Comment): Promise<Comment[] | null> {
-        const children = await getConnection()
-            .getRepository(Comment)
-            .createQueryBuilder('c')
-            .leftJoin(Reply, 'r', 'c."comment_id" = r."child_id"')
-            .where('r."parent_id" = :comment_id', { comment_id: comment.comment_id })
-            .getMany();
-        return children || null;
+    async replies(@Root() comment: Comment, @Ctx() context: ContextType & ContextWithLoader) {
+        const replyLoader = context.loaders.replyLoader;
+        return replyLoader.load(comment.comment_id);
     }
 
     @UseMiddleware(isAuth)
@@ -33,6 +28,7 @@ class CommentResolver {
             user_id: userId,
             createdAt: new Date(),
             updatedAt: new Date(),
+            //parent_id: parentId,
         }).save();
 
         if (parentId) {

@@ -5,6 +5,7 @@ import { Express } from 'express';
 import createExpressApp from '../config/createExpressApp';
 import { Comment } from '../entities/Comment';
 import { Reply } from '../entities/Reply';
+import { createReplyLoader } from '../utils/loaders/replyLoader';
 
 describe('Comment resolver', () => {
     let dbConn: Connection;
@@ -73,7 +74,7 @@ describe('Comment resolver', () => {
             }
         `;
 
-    const getCommentByFilmIdQueryWithReply = `
+    const getCommentByFilmIdQueryWithChild = `
              query GetCommentsByFilmId($filmId: Float!){
                 getCommentsByFilmId(filmId: $filmId){
                     comment_id
@@ -126,7 +127,7 @@ describe('Comment resolver', () => {
 
     const getCommentByFilmIdWithChildren = async (vars: getCommentByFilmIdVariables, context: any = {}) =>
         await testGqlCall({
-            source: getCommentByFilmIdQueryWithReply,
+            source: getCommentByFilmIdQueryWithChild,
             variableValues: vars,
             contextValue: context,
         });
@@ -296,8 +297,12 @@ describe('Comment resolver', () => {
                     user: null,
                 }
             );
-            let comments = await getCommentByFilmIdWithChildren({ filmId: 1 });
+            let comments = await getCommentByFilmIdWithChildren(
+                { filmId: 1 },
+                { loaders: { replyLoader: createReplyLoader() } }
+            );
             expect(comments.data?.getCommentsByFilmId[0].replies.length).toBe(2);
+            expect(comments.data?.getCommentsByFilmId[0].replies[0].content).toBe('this is a child comment');
         });
     });
 
