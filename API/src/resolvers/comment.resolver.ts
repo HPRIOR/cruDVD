@@ -1,31 +1,62 @@
-import { Arg, Ctx, Mutation, Resolver, UseMiddleware } from 'type-graphql';
+import { Arg, Ctx, FieldResolver, Mutation, Query, Resolver, Root, UseMiddleware } from 'type-graphql';
 import { Comment } from '../entities/Comment';
-import { v4 as uuid } from 'uuid';
 import { isAuth } from '../utils/auth/authMiddleWare';
-import { ContextType } from '../types/contextType';
+import { ContextType, WithLoaders } from '../types/contextType';
+import { Reply } from '../entities/Reply';
+import { getConnection } from 'typeorm';
 
-@Resolver()
+@Resolver(() => Comment)
 class CommentResolver {
+    @FieldResolver(() => [Comment], { nullable: true })
+    async replies(@Root() comment: Comment, @Ctx() context: ContextType & WithLoaders) {
+        const replyLoader = context.loaders.replyLoader;
+        return replyLoader.load(comment.comment_id);
+    }
+
     @UseMiddleware(isAuth)
     @Mutation(() => Comment, { nullable: true })
     async createComment(
         @Ctx() context: ContextType,
         @Arg('content') content: string,
         @Arg('filmId') filmId: number,
-        @Arg('parentId', { nullable: true }) parentId: string
+        @Arg('parentId', { nullable: true }) parentId: number
     ): Promise<Comment | null> {
         const userId = context.req.userId || context.user?.id;
-        if (parentId) {
-            // add parent to commented on relation
-        }
         const comment = await Comment.create({
             film_id: filmId,
             content: content,
             user_id: userId,
             createdAt: new Date(),
             updatedAt: new Date(),
+            //parent_id: parentId,
         }).save();
+
+        if (parentId) {
+            const parentComment = await Comment.findOne({ where: { comment_id: parentId } });
+            if (parentComment) {
+                const commentChild = new Reply(parentComment, comment);
+                await commentChild.save();
+            }
+        }
         return comment || null;
+    }
+
+    @Query(() => [Comment], { nullable: true })
+    async getCommentsByFilmId(@Arg('filmId') filmId: number): Promise<Comment[] | null> {
+        const comments = await Comment.find({ where: { film_id: filmId } });
+        return comments ? comments : null;
+    }
+
+    @Query(() => [Comment], { nullable: true })
+    async getRepliesOfComment(@Arg('commentId') commentId: number): Promise<Comment[] | null> {
+        const children = await getConnection()
+            .getRepository(Comment)
+            .createQueryBuilder('c')
+            .leftJoin(Reply, 'r', 'c."comment_id" = r."child_id"')
+            .where('r."parent_id" = :comment_id', { comment_id: commentId })
+            .getMany();
+
+        return children || null;
     }
 }
 

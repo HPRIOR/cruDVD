@@ -6,6 +6,7 @@ import { ApolloServer } from 'apollo-server-express';
 import createSchema from './createSchema';
 import cookieParser from 'cookie-parser';
 import authoriseContext from '../utils/auth/authoriseContext';
+import { createReplyLoader } from '../utils/loaders/replyLoader';
 
 const createExpressApp = async () => {
     const app = express();
@@ -27,7 +28,13 @@ const createExpressApp = async () => {
 
     const apolloServer = new ApolloServer({
         schema: await createSchema(),
-        context: ({ req, res }: any) => ({ req, res }),
+        context: ({ req, res }) => ({
+            req,
+            res,
+            loaders: {
+                replyLoader: createReplyLoader(),
+            },
+        }),
     });
 
     apolloServer.applyMiddleware({ app, cors: false });

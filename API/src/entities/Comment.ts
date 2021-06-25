@@ -5,14 +5,15 @@ import {
     Entity,
     JoinColumn,
     ManyToOne,
+    OneToMany,
     OneToOne,
-    PrimaryColumn,
     PrimaryGeneratedColumn,
     UpdateDateColumn,
 } from 'typeorm';
 import { Field, ID, ObjectType } from 'type-graphql';
 import { Film } from './Film';
 import { User } from './User';
+import { Reply } from './Reply';
 
 @Entity()
 @ObjectType()
@@ -26,7 +27,7 @@ export class Comment extends BaseEntity {
     film_id!: number; // type Film
 
     @JoinColumn({ name: 'film_id' })
-    @OneToOne(() => Film, film => film.film_id)
+    @ManyToOne(() => Film, film => film.film_id)
     film: Film;
 
     @Field()
@@ -48,4 +49,14 @@ export class Comment extends BaseEntity {
     @JoinColumn({ name: 'user_id' })
     @ManyToOne(() => User, user => user.comment)
     user: User;
+
+    @OneToMany(() => Reply, reply => reply.child_id)
+    child: Reply[];
+
+    // @Column({ nullable: true })
+    // parent_id: number;
+
+    @OneToMany(() => Reply, reply => reply.parent_id)
+    // @JoinColumn({ name: 'parent_id' })
+    parent: Reply[];
 }

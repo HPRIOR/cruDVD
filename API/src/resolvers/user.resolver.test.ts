@@ -8,18 +8,21 @@ import createExpressApp from '../config/createExpressApp';
 describe('userResolver', function () {
     let dbConn: Connection;
     let express: Express;
-    beforeAll(async () => {
-        dbConn = await testDbConnection();
-        express = await createExpressApp();
-    });
-    afterEach(async () => {
+    const clearDb = async () =>
         await getConnection().query(`
             DELETE
             from "user"
             Where true;
         `);
+    beforeAll(async () => {
+        dbConn = await testDbConnection();
+        express = await createExpressApp();
+    });
+    afterEach(async () => {
+        await clearDb();
     });
     afterAll(async () => {
+        await clearDb();
         await dbConn.close();
     });
 
@@ -303,7 +306,6 @@ describe('userResolver', function () {
 
         it('should return false when no user logged in', async () => {
             const logout = await logoutMut();
-            console.log(logout.data?.logout);
             expect(logout.data?.logout).toBe(false);
         });
     });
