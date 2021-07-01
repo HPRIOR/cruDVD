@@ -14,7 +14,6 @@ class FilmWithCategory extends Film {
 
 @Resolver(() => Film)
 class FilmResolver {
-    // TODO: only those comments without a parent ID have a film ID
     @FieldResolver(() => [Comment], { nullable: true })
     async comments(@Root() film: Film, @Ctx() context: ContextType & WithLoaders) {
         const loader = context.loaders.filmCommentLoader;

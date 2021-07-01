@@ -95,6 +95,5 @@ describe('filmResolver', function () {
             const language = filmData.data?.getFilmByTitle.language;
             expect(language).toBe('English');
         });
-        //TODO test get comments of test
     });
 });

@@ -13,7 +13,6 @@ class CommentResolver {
         return replyLoader.load(comment.comment_id);
     }
 
-    // TODO: make film id and optional param and check for when creating a comment must have either film or parent id
     @UseMiddleware(isAuth)
     @Mutation(() => Comment, { nullable: true })
     async createComment(
@@ -43,7 +42,15 @@ class CommentResolver {
 
     @Query(() => [Comment], { nullable: true })
     async getCommentsByFilmId(@Arg('filmId') filmId: number): Promise<Comment[] | null> {
-        const comments = await Comment.find({ where: { film_id: filmId } });
+        const comments: Comment[] = await getConnection().query(
+            `
+                select c.*
+                from comment c
+                where c.comment_id not in (select r.child_id from reply r)
+                  and c.film_id = $1
+            `,
+            [filmId]
+        );
         return comments ? comments : null;
     }
 
