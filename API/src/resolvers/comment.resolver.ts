@@ -13,6 +13,11 @@ class CommentResolver {
         return replyLoader.load(comment.comment_id);
     }
 
+    @FieldResolver(() => String, { nullable: true })
+    async short_content(@Root() comment: Comment) {
+        return comment.content.substring(0, 15) + '...';
+    }
+
     @UseMiddleware(isAuth)
     @Mutation(() => Comment, { nullable: true })
     async createComment(
