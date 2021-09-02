@@ -325,6 +325,31 @@ describe('Comment resolver', () => {
             expect(comments.data?.getCommentsByFilmId[0].replies[0].content).toBe('this is a child comment');
             expect(comments.data?.getCommentsByFilmId[0].replies[1].content).toBe('this is another child comment');
         });
+
+        it('should only get top level film ids without child comments', async () => {
+            await createComment(
+                { filmId: 1, content: 'this is a parent comment', parentId: null },
+                {
+                    req: { userId: 1 },
+                    user: null,
+                }
+            );
+
+            const parentComment = await Comment.findOne({ where: { content: 'this is a parent comment' } });
+            const parentCommentId = parentComment!.comment_id;
+
+            await createComment(
+                { filmId: 1, content: 'this is a child comment', parentId: parentCommentId },
+                {
+                    req: { userId: 1 },
+                    user: null,
+                }
+            );
+
+            const comments = await getCommentByFilmId({ filmId: 1 });
+            expect(comments.data?.getCommentsByFilmId.length).toBe(1);
+            expect(comments.data?.getCommentsByFilmId[0].content).toBe('this is a parent comment');
+        });
     });
 
     describe('getChildrenOfComment', () => {
@@ -351,4 +376,6 @@ describe('Comment resolver', () => {
             expect(children.data?.getRepliesOfComment.length).toBe(1);
         });
     });
+
+    describe('getCommentsByFilmId', () => {});
 });

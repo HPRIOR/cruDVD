@@ -13,6 +13,11 @@ class CommentResolver {
         return replyLoader.load(comment.comment_id);
     }
 
+    @FieldResolver(() => String, { nullable: true })
+    async short_content(@Root() comment: Comment) {
+        return comment.content.substring(0, 15) + '...';
+    }
+
     @UseMiddleware(isAuth)
     @Mutation(() => Comment, { nullable: true })
     async createComment(
@@ -28,7 +33,6 @@ class CommentResolver {
             user_id: userId,
             createdAt: new Date(),
             updatedAt: new Date(),
-            //parent_id: parentId,
         }).save();
 
         if (parentId) {
@@ -43,7 +47,15 @@ class CommentResolver {
 
     @Query(() => [Comment], { nullable: true })
     async getCommentsByFilmId(@Arg('filmId') filmId: number): Promise<Comment[] | null> {
-        const comments = await Comment.find({ where: { film_id: filmId } });
+        const comments: Comment[] = await getConnection().query(
+            `
+                select c.*
+                from comment c
+                where c.comment_id not in (select r.child_id from reply r)
+                  and c.film_id = $1
+            `,
+            [filmId]
+        );
         return comments ? comments : null;
     }
 

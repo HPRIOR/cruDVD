@@ -7,6 +7,10 @@ import createSchema from './createSchema';
 import cookieParser from 'cookie-parser';
 import authoriseContext from '../utils/auth/authoriseContext';
 import { createReplyLoader } from '../utils/loaders/replyLoader';
+import { createCategoryLoader } from '../utils/loaders/categoryLoader';
+import { createActorLoader } from '../utils/loaders/actorLoader';
+import { createLanguageLoader } from '../utils/loaders/languageLoader';
+import { createFilmCommentLoader } from '../utils/loaders/filmCommentLoader';
 
 const createExpressApp = async () => {
     const app = express();
@@ -33,6 +37,10 @@ const createExpressApp = async () => {
             res,
             loaders: {
                 replyLoader: createReplyLoader(),
+                categoryLoader: createCategoryLoader(),
+                actorLoader: createActorLoader(),
+                languageLoader: createLanguageLoader(),
+                filmCommentLoader: createFilmCommentLoader(),
             },
         }),
     });

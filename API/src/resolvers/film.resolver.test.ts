@@ -1,6 +1,9 @@
 import { Connection } from 'typeorm';
 import { testGqlCall } from '../test-utils/testGqlCall';
 import { testDbConnection } from '../test-utils/testDbConnection';
+import { createCategoryLoader } from '../utils/loaders/categoryLoader';
+import { createActorLoader } from '../utils/loaders/actorLoader';
+import { createLanguageLoader } from '../utils/loaders/languageLoader';
 
 describe('filmResolver', function () {
     let dbConn: Connection;
@@ -44,6 +47,19 @@ describe('filmResolver', function () {
                 variableValues: { title: 'Aladdin Calendar' },
             });
 
+        const getFilmDataWithContextLoaders = () =>
+            testGqlCall({
+                source: getFilmQuery,
+                variableValues: { title: 'Aladdin Calendar' },
+                contextValue: {
+                    loaders: {
+                        categoryLoader: createCategoryLoader(),
+                        actorLoader: createActorLoader(),
+                        languageLoader: createLanguageLoader(),
+                    },
+                },
+            });
+
         it('should return data', async () => {
             const filmData = await getFilmData();
             expect(filmData.data).toBeDefined();
@@ -65,19 +81,44 @@ describe('filmResolver', function () {
             expect(title).toBe('2006');
         });
         it('should return correct category data', async () => {
-            const filmData = await getFilmData();
+            const filmData = await getFilmDataWithContextLoaders();
             const category = filmData.data?.getFilmByTitle.category;
             expect(category).toBe('Sports');
         });
         it('should return correct number of actors', async () => {
-            const filmData = await getFilmData();
+            const filmData = await getFilmDataWithContextLoaders();
             const actors = filmData.data?.getFilmByTitle.actors;
             expect(actors?.length).toBe(8);
         });
         it('should return correct language', async () => {
-            const filmData = await getFilmData();
+            const filmData = await getFilmDataWithContextLoaders();
             const language = filmData.data?.getFilmByTitle.language;
             expect(language).toBe('English');
+        });
+
+        describe('getAllFilms', () => {
+            const getAllFilmsQuery = `
+               query GetAllFilms($take: number, $after: number){ 
+                {
+                    getAllFilms(pagination: { take: $take, after: $after}) {
+                        films {
+                            film_id
+                            title
+                        }
+                        cursor
+                     }
+                }
+            `;
+            const getPaginatedFilms = (take?: number, after?: number) =>
+                testGqlCall({
+                    source: getAllFilmsQuery,
+                    variableValues: { take: take || null, after: after || null },
+                });
+
+            it('should get all films', async () => {
+                const firstTenFilms = await getPaginatedFilms();
+                firstTenFilms.data?.getAllFilms;
+            });
         });
     });
 });

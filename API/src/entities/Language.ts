@@ -11,7 +11,7 @@ export class Language extends BaseEntity {
     film: Film;
 
     @Column()
-    name: number;
+    name: string;
     @UpdateDateColumn()
     last_update: number;
 }
