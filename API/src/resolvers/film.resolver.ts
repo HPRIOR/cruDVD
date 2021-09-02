@@ -1,4 +1,4 @@
-import { Arg, Ctx, Field, FieldResolver, ObjectType, Query, Resolver, Root } from 'type-graphql';
+import { Arg, Ctx, Field, FieldResolver, InputType, ObjectType, Query, Resolver, Root } from 'type-graphql';
 import { Film } from '../entities/Film';
 import { Category } from '../entities/Category';
 import { getConnection } from 'typeorm';
@@ -10,6 +10,29 @@ import { ContextType, WithLoaders } from '../types/contextType';
 class FilmWithCategory extends Film {
     @Field()
     name: string;
+}
+
+@InputType()
+class PaginationInput {
+    @Field({ nullable: true })
+    take?: number;
+
+    @Field({ nullable: true })
+    after?: number;
+}
+
+@ObjectType()
+class PaginatedFilms {
+    constructor(films: Film[], pagination: PaginationInput) {
+        this.films = films;
+        const take = pagination.take || 0;
+        const after = pagination.after || 0;
+        this.cursor = take + after;
+    }
+    @Field(() => [Film])
+    films: Film[];
+    @Field()
+    cursor: number;
 }
 
 @Resolver(() => Film)
@@ -38,9 +61,14 @@ class FilmResolver {
         return loader.load(film.film_id);
     }
 
-    @Query(() => [Film])
-    async getAllFilms() {
-        return Film.find({});
+    @Query(() => PaginatedFilms)
+    async getAllFilms(@Arg('pagination') pagination: PaginationInput) {
+        const skip = pagination.after === null ? 0 : pagination.after;
+        const films =
+            pagination.take === null
+                ? await Film.find({ skip: skip })
+                : await Film.find({ skip: skip, take: pagination.take });
+        return new PaginatedFilms(films, pagination);
     }
 
     @Query(() => Film, { nullable: true })

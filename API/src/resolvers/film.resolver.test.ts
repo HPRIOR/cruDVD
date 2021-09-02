@@ -95,5 +95,30 @@ describe('filmResolver', function () {
             const language = filmData.data?.getFilmByTitle.language;
             expect(language).toBe('English');
         });
+
+        describe('getAllFilms', () => {
+            const getAllFilmsQuery = `
+               query GetAllFilms($take: number, $after: number){ 
+                {
+                    getAllFilms(pagination: { take: $take, after: $after}) {
+                        films {
+                            film_id
+                            title
+                        }
+                        cursor
+                     }
+                }
+            `;
+            const getPaginatedFilms = (take?: number, after?: number) =>
+                testGqlCall({
+                    source: getAllFilmsQuery,
+                    variableValues: { take: take || null, after: after || null },
+                });
+
+            it('should get all films', async () => {
+                const firstTenFilms = await getPaginatedFilms();
+                firstTenFilms.data?.getAllFilms;
+            });
+        });
     });
 });
