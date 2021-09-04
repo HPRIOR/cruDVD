@@ -6,12 +6,6 @@ import { Actor } from '../entities/Actor';
 import { Comment } from '../entities/Comment';
 import { ContextType, WithLoaders } from '../types/contextType';
 
-@ObjectType()
-class FilmWithCategory extends Film {
-    @Field()
-    name: string;
-}
-
 @InputType()
 class PaginationInput {
     @Field({ nullable: true })
@@ -62,7 +56,7 @@ class FilmResolver {
     }
 
     @Query(() => PaginatedFilms)
-    async getAllFilms(@Arg('pagination') pagination: PaginationInput) {
+    async getFilms(@Arg('pagination') pagination: PaginationInput) {
         const skip = pagination.after === null ? 0 : pagination.after;
         const films =
             pagination.take === null
@@ -79,13 +73,13 @@ class FilmResolver {
         } else return null;
     }
 
-    @Query(() => [FilmWithCategory], { nullable: true })
-    async getFilmsByCategory(@Arg('categoryName') categoryName: string): Promise<FilmWithCategory[] | null> {
+    @Query(() => [Film], { nullable: true })
+    async getFilmsByCategory(@Arg('categoryName') categoryName: string): Promise<Film[] | null> {
         const category = await Category.findOne({ name: categoryName });
         if (!category) return null;
         return (
             (await getConnection().query(`
-                select f.*, c.name
+                select f.*
                 from dvdrental.public.film f,
                      dvdrental.public.film_category fc,
                      dvdrental.public.category c
