@@ -14,25 +14,25 @@ describe('Comment resolver', () => {
     const clearCommentTables = async () => {
         await getConnection().query(`
             DELETE
-            from "crudDVDTestDB".public."reply"
+            from dvdrental.public."reply"
             Where true;
         `);
         await getConnection().query(`
             DELETE
-            from "crudDVDTestDB".public."comment"
+            from dvdrental.public."comment"
             Where true;
         `);
     };
     const clearUserTable = async () => {
         await getConnection().query(`
             DELETE
-            from "user"
+            from dvdrental.public."user"
             Where true;
         `);
     };
     const createTestUser = async () => {
         await getConnection().query(`
-            INSERT INTO "crudDVDTestDB".public."user"
+            INSERT INTO dvdrental.public."user"
             VALUES (1, 'test-user', 'test-user@email.com', '12345asdafFASD£$', 1);
         `);
     };
