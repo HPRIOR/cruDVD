@@ -3,7 +3,7 @@
 # Edit at https://www.toptal.com/developers/gitignore?templates=jetbrains,visualstudio,visualstudiocode,node,dotenv,macos,windows,linux,git
 
 ### dotenv ###
-.env
+API/.env
 
 ### Git ###
 # Created by git for backups. To disable backups in Git:
