@@ -86,9 +86,9 @@ class FilmResolver {
         return (
             (await getConnection().query(`
                 select f.*, c.name
-                from film f,
-                     film_category fc,
-                     category c
+                from dvdrental.public.film f,
+                     dvdrental.public.film_category fc,
+                     dvdrental.public.category c
                 where f.film_id = fc.film_id
                   and fc.category_id = ${category.category_id}
                   and fc.category_id = c.category_id
