@@ -1,3 +1,4 @@
+import 'reflect-metadata';
 import getDbConnection from './app/dbConnection';
 import createExpressApp from './app/createExpressApp';
 import { Connection } from 'typeorm';
