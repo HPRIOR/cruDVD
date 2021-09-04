@@ -11,7 +11,7 @@ describe('userResolver', function () {
     const clearDb = async () =>
         await getConnection().query(`
             DELETE
-            from "user"
+            from dvdrental.public."user"
             Where true;
         `);
     beforeAll(async () => {
