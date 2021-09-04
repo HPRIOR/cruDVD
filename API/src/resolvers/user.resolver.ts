@@ -3,11 +3,11 @@ import { User } from '../entities/User';
 import generateTokens from '../utils/auth/generateTokens';
 import { v4 as uuid } from 'uuid';
 import * as argon2 from 'argon2';
-import { RegisterInput } from './gqlTypes/registerInput';
-import { UserResponse } from './gqlTypes/userResponse';
+import { RegisterInput } from './types/registerInput';
+import { UserResponse } from './types/userResponse';
 import { ContextType } from '../types/contextType';
 import { getConnection } from 'typeorm';
-import { ValidateUsernamePasswordInput } from '../utils/auth/validateUsernamePassswordInput';
+import { ValidateUsernamePasswordInput } from '../utils/auth/types/validateUsernamePassswordInput';
 import {
     passwordContainsSymbols,
     passwordContainsUpperCase,

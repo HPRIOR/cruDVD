@@ -9,7 +9,7 @@ export const createLanguageLoader = () =>
         const languages: (Language & WithFilmId)[] = await getConnection().query(
             `
             select l.name, f.film_id
-            from language l,  film f
+            from dvdrental.public.language l,  dvdrental.public.film f
             where l.language_id = f.language_id
             and f.film_id = ANY($1)
             `,

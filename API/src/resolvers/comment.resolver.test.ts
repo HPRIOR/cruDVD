@@ -2,7 +2,7 @@ import { Connection, getConnection } from 'typeorm';
 import { testDbConnection } from '../test-utils/testDbConnection';
 import { testGqlCall } from '../test-utils/testGqlCall';
 import { Express } from 'express';
-import createExpressApp from '../config/createExpressApp';
+import createExpressApp from '../app/createExpressApp';
 import { Comment } from '../entities/Comment';
 import { Reply } from '../entities/Reply';
 import { createReplyLoader } from '../utils/loaders/replyLoader';

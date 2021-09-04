@@ -3,7 +3,7 @@ import { testGqlCall } from '../test-utils/testGqlCall';
 import { testDbConnection } from '../test-utils/testDbConnection';
 import { User } from '../entities/User';
 import { Express } from 'express';
-import createExpressApp from '../config/createExpressApp';
+import createExpressApp from '../app/createExpressApp';
 
 describe('userResolver', function () {
     let dbConn: Connection;

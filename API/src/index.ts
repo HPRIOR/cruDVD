@@ -1,5 +1,5 @@
-import getDbConnection from './config/dbConnection';
-import createExpressApp from './config/createExpressApp';
+import getDbConnection from './app/dbConnection';
+import createExpressApp from './app/createExpressApp';
 import { Connection } from 'typeorm';
 
 const main = async () => {
