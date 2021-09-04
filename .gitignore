@@ -704,3 +704,5 @@ FodyWeavers.xsd
 /.idea/codeStyles/Project.xml
 /.idea/prettier.xml
 /.idea/dataSources.xml
+
+/db/mount/*
