@@ -9,7 +9,7 @@ export const createCategoryLoader = () =>
         const categories: (Category & WithFilmId)[] = await getConnection().query(
             `
             select c.name, fc.film_id
-            from category c, film_category fc
+            from dvdrental.public.category c, dvdrental.public.film_category fc
             where c.category_id = fc.category_id
             and fc.film_id = ANY($1)
             `,

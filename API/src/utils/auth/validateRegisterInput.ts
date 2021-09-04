@@ -1,7 +1,7 @@
-import { ValidateUsernamePasswordInput } from './validateUsernamePassswordInput';
-import { RegisterInput } from '../../resolvers/gqlTypes/registerInput';
+import { ValidateUsernamePasswordInput } from './types/validateUsernamePassswordInput';
+import { RegisterInput } from '../../resolvers/types/registerInput';
 import { Just, Nothing } from 'purify-ts';
-import { UserResponseError } from '../../resolvers/gqlTypes/userResponseError';
+import { UserResponseError } from '../../resolvers/types/userResponseError';
 import { ValidatorResponse } from './types/validatorResponse';
 
 export const registerInputIsValid = (

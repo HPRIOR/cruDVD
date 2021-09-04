@@ -9,7 +9,7 @@ export const createFilmCommentLoader = () =>
         const comments: Comment[] = await getConnection().query(
             `
             select c.*
-            from comment c 
+            from dvdrental.public.comment c 
             where film_id = Any($1)
             `,
             [filmIds]

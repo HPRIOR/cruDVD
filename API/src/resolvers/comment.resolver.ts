@@ -50,8 +50,8 @@ class CommentResolver {
         const comments: Comment[] = await getConnection().query(
             `
                 select c.*
-                from comment c
-                where c.comment_id not in (select r.child_id from reply r)
+                from dvdrental.public.comment c
+                where c.comment_id not in (select r.child_id from dvdrental.public.reply r)
                   and c.film_id = $1
             `,
             [filmId]

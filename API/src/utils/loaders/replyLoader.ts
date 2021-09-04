@@ -9,8 +9,8 @@ export const createReplyLoader = () =>
         const replies: (Comment & WithParentId)[] = await getConnection().query(
             `
                 select c.*, r.parent_id
-                from reply r,
-                     comment c
+                from dvdrental.public.reply r,
+                     dvdrental.public.comment c
                 where r.child_id = c.comment_id
                   and r.parent_id = ANY ($1)
             `,

@@ -1,4 +1,4 @@
-import { RegisterInput } from '../../resolvers/gqlTypes/registerInput';
+import { RegisterInput } from '../../resolvers/types/registerInput';
 import { passwordContainsSymbols, registerInputIsValid, shortEmail, shortUsername } from './validateRegisterInput';
 
 describe('validateRegisterInput', () => {
