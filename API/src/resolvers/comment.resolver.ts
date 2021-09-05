@@ -4,7 +4,9 @@ import { isAuth } from '../utils/auth/authMiddleWare';
 import { ContextType, WithLoaders } from '../types/contextType';
 import { Reply } from '../entities/Reply';
 import { getConnection } from 'typeorm';
+import { injectable } from 'inversify';
 
+@injectable()
 @Resolver(() => Comment)
 class CommentResolver {
     @FieldResolver(() => [Comment], { nullable: true })

@@ -15,7 +15,9 @@ import {
     shortPassword,
     shortUsername,
 } from '../utils/auth/validateRegisterInput';
+import { injectable } from 'inversify';
 
+@injectable()
 @Resolver()
 export class UserResolver {
     @Mutation(() => UserResponse, { nullable: true })

@@ -7,5 +7,5 @@ export interface IFilmDAO {
 
     getFilmByTitle(title: title): Promise<Film | null>;
 
-    getFilmsByCategory(category: Category): Promise<Film[] | null>;
+    getFilmsByCategory(category: Category, take?: take, skip?: skip): Promise<Film[] | null>;
 }

@@ -4,6 +4,7 @@ import { testDbConnection } from '../test-utils/testDbConnection';
 import { createCategoryLoader } from '../utils/loaders/categoryLoader';
 import { createActorLoader } from '../utils/loaders/actorLoader';
 import { createLanguageLoader } from '../utils/loaders/languageLoader';
+import { Film } from '../entities/Film';
 
 describe('filmResolver', function () {
     let dbConn: Connection;
@@ -98,9 +99,9 @@ describe('filmResolver', function () {
 
         describe('getAllFilms', () => {
             const getAllFilmsQuery = `
-               query GetAllFilms($take: number, $after: number){ 
+               query GetFilms($take: Float, $after: Float) 
                 {
-                    getAllFilms(pagination: { take: $take, after: $after}) {
+                    getFilms(pagination: { take: $take, after: $after}) {
                         films {
                             film_id
                             title
@@ -109,15 +110,61 @@ describe('filmResolver', function () {
                      }
                 }
             `;
-            const getPaginatedFilms = (take?: number, after?: number) =>
+            const getPaginatedFilms = (after: number, take?: number) =>
                 testGqlCall({
                     source: getAllFilmsQuery,
                     variableValues: { take: take || null, after: after || null },
                 });
 
-            it('should get all films', async () => {
-                const firstTenFilms = await getPaginatedFilms();
-                firstTenFilms.data?.getAllFilms;
+            it('should get first ten films', async () => {
+                const firstTenFilms = await getPaginatedFilms(0, 10);
+                let id = 1;
+                firstTenFilms.data?.getFilms.films.forEach((film: Film) => {
+                    expect(film.film_id).toBe(id.toString());
+                    id++;
+                });
+            });
+
+            it('should return correct cursor value', async () => {
+                const firstTenFilms = await getPaginatedFilms(0, 10);
+                let cursor = firstTenFilms.data?.getFilms.cursor;
+                expect(cursor).toBe(10);
+            });
+            it('should get next films from after value', async () => {
+                const firstTenFilms = await getPaginatedFilms(10, 10);
+                let id = 11;
+                firstTenFilms.data?.getFilms.films.forEach((film: Film) => {
+                    expect(film.film_id).toBe(id.toString());
+                    id++;
+                });
+            });
+        });
+        describe('getFilmsByCategory', () => {
+            const getFilmsByCategory = `
+               query GetFilmsByCategory($categoryName: String!, $take: Float, $after: Float) 
+                {
+                    getFilmsByCategory(categoryName: $categoryName, pagination: { take: $take, after: $after}) {
+                        films {
+                            film_id
+                        }
+                        cursor
+                     }
+                }
+            `;
+            const getFilmsByCategoryQuery = (categoryName: string, after?: number, take?: number) =>
+                testGqlCall({
+                    source: getFilmsByCategory,
+                    variableValues: { categoryName: categoryName, take: take || null, after: after || null },
+                });
+
+            it('should get all action movies', async () => {
+                const actionFilms = await getFilmsByCategoryQuery('Action');
+                expect(actionFilms.data?.getFilmsByCategory.films.length).toBe(64);
+            });
+
+            it('should get 10 action movies', async () => {
+                const actionFilms = await getFilmsByCategoryQuery('Action', 0, 10);
+                expect(actionFilms.data?.getFilmsByCategory.films.length).toBe(10);
             });
         });
     });
