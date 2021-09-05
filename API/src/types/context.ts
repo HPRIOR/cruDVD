@@ -2,7 +2,7 @@ import { User } from '../entities/User';
 import DataLoader from 'dataloader';
 import { Actor } from '../entities/Actor';
 
-export type ContextType = {
+export type Context = {
     req: any;
     res: any;
     user: User | null;

@@ -1,4 +1,4 @@
-import { ContextType } from '../../types/contextType';
+import { Context } from '../../types/context';
 import generateTokens from './generateTokens';
 import { User } from '../../entities/User';
 import { verify } from 'jsonwebtoken';
@@ -16,7 +16,7 @@ when cache is refreshed.
  */
 
 type ExpressReqRes = { req: express.Request; res: express.Response };
-const authoriseContext = async ({ req, res }: ExpressReqRes): Promise<ContextType> => {
+const authoriseContext = async ({ req, res }: ExpressReqRes): Promise<Context> => {
     const accessToken = req.cookies['access-token'];
     const refreshToken = req.cookies['refresh-token'];
     if (!accessToken && !refreshToken) {
@@ -29,7 +29,7 @@ const tryGenerateContextWithAccessToken = async (
     { req, res }: ExpressReqRes,
     accessToken: string,
     refreshToken: string
-): Promise<ContextType> => {
+): Promise<Context> => {
     const userInfo = tryGetUserInfoFromAccessToken(accessToken);
     // cache hit - don't do lookup user
     if (userInfo) {
@@ -44,7 +44,7 @@ const tryGenerateContextWithAccessToken = async (
 const tryGenerateContextWithRefreshToken = async (
     { req, res }: ExpressReqRes,
     refreshToken: string
-): Promise<ContextType> => {
+): Promise<Context> => {
     const user = await tryGetUserFromRefreshToken(refreshToken);
     if (user) {
         const { accessToken, refreshToken } = generateTokens(user);

@@ -6,6 +6,7 @@ import createExpressApp from '../app/createExpressApp';
 import { Comment } from '../entities/Comment';
 import { Reply } from '../entities/Reply';
 import { createReplyLoader } from '../utils/loaders/replyLoader';
+import { container } from '../container/container';
 
 describe('Comment resolver', () => {
     let dbConn: Connection;
@@ -104,34 +105,46 @@ describe('Comment resolver', () => {
 
     type createCommentVariables = { filmId?: number | null; parentId: number | null; content: string };
     const createComment = async (vars: createCommentVariables, context: any = {}) =>
-        await testGqlCall({
-            source: createCommentMut,
-            variableValues: vars,
-            contextValue: context,
-        });
+        await testGqlCall(
+            {
+                source: createCommentMut,
+                variableValues: vars,
+                contextValue: context,
+            },
+            container
+        );
 
     type getCommentByFilmIdVariables = { filmId: number };
     const getCommentByFilmId = async (vars: getCommentByFilmIdVariables, context: any = {}) =>
-        await testGqlCall({
-            source: getCommentByFilmIdQuery,
-            variableValues: vars,
-            contextValue: context,
-        });
+        await testGqlCall(
+            {
+                source: getCommentByFilmIdQuery,
+                variableValues: vars,
+                contextValue: context,
+            },
+            container
+        );
 
     type getChildrenOfComment = { commentId: number };
     const getChildrenOfComment = async (vars: getChildrenOfComment, context: any = {}) =>
-        await testGqlCall({
-            source: getRepliesOfCommentQuery,
-            variableValues: vars,
-            contextValue: context,
-        });
+        await testGqlCall(
+            {
+                source: getRepliesOfCommentQuery,
+                variableValues: vars,
+                contextValue: context,
+            },
+            container
+        );
 
     const getCommentByFilmIdWithChildren = async (vars: getCommentByFilmIdVariables, context: any = {}) =>
-        await testGqlCall({
-            source: getCommentByFilmIdQueryWithChild,
-            variableValues: vars,
-            contextValue: context,
-        });
+        await testGqlCall(
+            {
+                source: getCommentByFilmIdQueryWithChild,
+                variableValues: vars,
+                contextValue: context,
+            },
+            container
+        );
 
     describe('createComment', () => {
         it('should create comment ', async () => {

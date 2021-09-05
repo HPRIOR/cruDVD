@@ -3,7 +3,7 @@ import { Film } from '../entities/Film';
 import { Category } from '../entities/Category';
 import { Actor } from '../entities/Actor';
 import { Comment } from '../entities/Comment';
-import { ContextType, WithLoaders } from '../types/contextType';
+import { Context, WithLoaders } from '../types/context';
 import { inject, injectable } from 'inversify';
 import { TYPES } from '../container/types';
 import { IFilmDAO } from '../dao/interfaces/IFilmDAO';
@@ -44,25 +44,25 @@ class FilmResolver {
     }
 
     @FieldResolver(() => [Comment], { nullable: true })
-    async comments(@Root() film: Film, @Ctx() context: ContextType & WithLoaders) {
+    async comments(@Root() film: Film, @Ctx() context: Context & WithLoaders) {
         const loader = context.loaders.filmCommentLoader;
         return loader.load(film.film_id);
     }
 
     @FieldResolver(() => String, { nullable: true })
-    async category(@Root() film: Film, @Ctx() context: ContextType & WithLoaders) {
+    async category(@Root() film: Film, @Ctx() context: Context & WithLoaders) {
         const loader = context.loaders.categoryLoader;
         return loader.load(film.film_id);
     }
 
     @FieldResolver(() => [Actor], { nullable: true })
-    async actors(@Root() film: Film, @Ctx() context: ContextType & WithLoaders) {
+    async actors(@Root() film: Film, @Ctx() context: Context & WithLoaders) {
         const loader = context.loaders.actorLoader;
         return loader.load(film.film_id);
     }
 
     @FieldResolver(() => String, { nullable: true })
-    async language(@Root() film: Film, @Ctx() context: ContextType & WithLoaders) {
+    async language(@Root() film: Film, @Ctx() context: Context & WithLoaders) {
         const loader = context.loaders.languageLoader;
         return loader.load(film.film_id);
     }

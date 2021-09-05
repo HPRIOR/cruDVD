@@ -5,7 +5,7 @@ import { v4 as uuid } from 'uuid';
 import * as argon2 from 'argon2';
 import { RegisterInput } from './types/registerInput';
 import { UserResponse } from './types/userResponse';
-import { ContextType } from '../types/contextType';
+import { Context } from '../types/context';
 import { getConnection } from 'typeorm';
 import { ValidateUsernamePasswordInput } from '../utils/auth/types/validateUsernamePassswordInput';
 import {
@@ -21,7 +21,7 @@ import { injectable } from 'inversify';
 @Resolver()
 export class UserResolver {
     @Mutation(() => UserResponse, { nullable: true })
-    async login(@Arg('input') input: RegisterInput, @Ctx() context: ContextType) {
+    async login(@Arg('input') input: RegisterInput, @Ctx() context: Context) {
         if (context.user) {
             return { user: context.user };
         }
@@ -42,7 +42,7 @@ export class UserResolver {
     }
 
     @Mutation(() => UserResponse)
-    async register(@Arg('input') input: RegisterInput, @Ctx() context: ContextType) {
+    async register(@Arg('input') input: RegisterInput, @Ctx() context: Context) {
         const inputValidators: ValidateUsernamePasswordInput[] = [
             shortPassword,
             shortUsername,
@@ -68,7 +68,7 @@ export class UserResolver {
     }
 
     @Mutation(() => Boolean)
-    async logout(@Ctx() context: ContextType) {
+    async logout(@Ctx() context: Context) {
         const noUserLoggedIn = !context.user && !context.req.userId;
         if (noUserLoggedIn) {
             return false;

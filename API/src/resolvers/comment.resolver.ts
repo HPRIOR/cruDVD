@@ -1,16 +1,24 @@
 import { Arg, Ctx, FieldResolver, Mutation, Query, Resolver, Root, UseMiddleware } from 'type-graphql';
 import { Comment } from '../entities/Comment';
 import { isAuth } from '../utils/auth/authMiddleWare';
-import { ContextType, WithLoaders } from '../types/contextType';
+import { Context, WithLoaders } from '../types/context';
 import { Reply } from '../entities/Reply';
 import { getConnection } from 'typeorm';
-import { injectable } from 'inversify';
+import { inject, injectable } from 'inversify';
+import { TYPES } from '../container/types';
+import { ICommentDAO } from '../dao/interfaces/ICommentDAO';
 
 @injectable()
 @Resolver(() => Comment)
 class CommentResolver {
+    commentDAO: ICommentDAO;
+
+    constructor(@inject(TYPES.ICommentDAO) commentDAO: ICommentDAO) {
+        this.commentDAO = commentDAO;
+    }
+
     @FieldResolver(() => [Comment], { nullable: true })
-    async replies(@Root() comment: Comment, @Ctx() context: ContextType & WithLoaders) {
+    async replies(@Root() comment: Comment, @Ctx() context: Context & WithLoaders) {
         const replyLoader = context.loaders.replyLoader;
         return replyLoader.load(comment.comment_id);
     }
@@ -23,34 +31,18 @@ class CommentResolver {
     @UseMiddleware(isAuth)
     @Mutation(() => Comment, { nullable: true })
     async createComment(
-        @Ctx() context: ContextType,
+        @Ctx() context: Context,
         @Arg('content') content: string,
         @Arg('filmId', { nullable: true }) filmId?: number,
         @Arg('parentId', { nullable: true }) parentId?: number
     ): Promise<Comment | null> {
         if (!filmId && !parentId) throw Error('Must include either a filmId or a parentId');
-        const userId = context.req.userId || context.user?.id;
-        let comment;
-        if (filmId != null) {
-            comment = await Comment.create({
-                film_id: filmId,
-                content: content,
-                user_id: userId,
-                createdAt: new Date(),
-                updatedAt: new Date(),
-            }).save();
-        } else {
-            comment = await Comment.create({
-                content: content,
-                user_id: userId,
-                createdAt: new Date(),
-                updatedAt: new Date(),
-            }).save();
-        }
-
+        let comment = await this.commentDAO.createComment(context, content, filmId);
         if (parentId != null) {
+            // TODO: create getCommentsByFilmId in DAO
             const parentComment = await Comment.findOne({ where: { comment_id: parentId } });
-            if (parentComment) {
+            if (parentComment && comment) {
+                // TODO create replyDAO with create reply;
                 const commentChild = new Reply(parentComment, comment);
                 await commentChild.save();
             }
@@ -64,7 +56,8 @@ class CommentResolver {
             `
                 select c.*
                 from dvdrental.public.comment c
-                where c.comment_id not in (select r.child_id from dvdrental.public.reply r)
+                where c
+                    .comment_id not in (select r.child_id from dvdrental.public.reply r)
                   and c.film_id = $1
             `,
             [filmId]
