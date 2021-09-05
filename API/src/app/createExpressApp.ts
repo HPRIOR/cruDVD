@@ -10,6 +10,7 @@ import { createCategoryLoader } from '../utils/loaders/categoryLoader';
 import { createActorLoader } from '../utils/loaders/actorLoader';
 import { createLanguageLoader } from '../utils/loaders/languageLoader';
 import { createFilmCommentLoader } from '../utils/loaders/filmCommentLoader';
+import { container } from '../container/container';
 
 const createExpressApp = async () => {
     const app = express();
@@ -30,7 +31,7 @@ const createExpressApp = async () => {
     });
 
     const apolloServer = new ApolloServer({
-        schema: await createSchema(),
+        schema: await createSchema(container),
         context: ({ req, res }) => ({
             req,
             res,

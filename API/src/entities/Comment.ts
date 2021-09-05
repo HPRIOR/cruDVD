@@ -23,8 +23,8 @@ export class Comment extends BaseEntity {
     comment_id!: number;
 
     @Field()
-    @Column()
-    film_id!: number; // type Film
+    @Column({ nullable: true })
+    film_id?: number;
 
     @JoinColumn({ name: 'film_id' })
     @ManyToOne(() => Film, film => film.film_id)

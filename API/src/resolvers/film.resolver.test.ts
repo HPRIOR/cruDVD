@@ -5,6 +5,7 @@ import { createCategoryLoader } from '../utils/loaders/categoryLoader';
 import { createActorLoader } from '../utils/loaders/actorLoader';
 import { createLanguageLoader } from '../utils/loaders/languageLoader';
 import { Film } from '../entities/Film';
+import { container } from '../container/container';
 
 describe('filmResolver', function () {
     let dbConn: Connection;
@@ -43,10 +44,13 @@ describe('filmResolver', function () {
           `;
 
         const getFilmData = () =>
-            testGqlCall({
-                source: getFilmQuery,
-                variableValues: { title: 'Aladdin Calendar' },
-            });
+            testGqlCall(
+                {
+                    source: getFilmQuery,
+                    variableValues: { title: 'Aladdin Calendar' },
+                },
+                container
+            );
 
         const getFilmDataWithContextLoaders = () =>
             testGqlCall({

@@ -25,19 +25,30 @@ class CommentResolver {
     async createComment(
         @Ctx() context: ContextType,
         @Arg('content') content: string,
-        @Arg('filmId') filmId: number,
-        @Arg('parentId', { nullable: true }) parentId: number
+        @Arg('filmId', { nullable: true }) filmId?: number,
+        @Arg('parentId', { nullable: true }) parentId?: number
     ): Promise<Comment | null> {
+        if (!filmId && !parentId) throw Error('Must include either a filmId or a parentId');
         const userId = context.req.userId || context.user?.id;
-        const comment = await Comment.create({
-            film_id: filmId,
-            content: content,
-            user_id: userId,
-            createdAt: new Date(),
-            updatedAt: new Date(),
-        }).save();
+        let comment;
+        if (filmId != null) {
+            comment = await Comment.create({
+                film_id: filmId,
+                content: content,
+                user_id: userId,
+                createdAt: new Date(),
+                updatedAt: new Date(),
+            }).save();
+        } else {
+            comment = await Comment.create({
+                content: content,
+                user_id: userId,
+                createdAt: new Date(),
+                updatedAt: new Date(),
+            }).save();
+        }
 
-        if (parentId) {
+        if (parentId != null) {
             const parentComment = await Comment.findOne({ where: { comment_id: parentId } });
             if (parentComment) {
                 const commentChild = new Reply(parentComment, comment);

@@ -54,7 +54,7 @@ describe('Comment resolver', () => {
     });
 
     const createCommentMut = `
-            mutation CreateComment($content: String!, $filmId: Float!, $parentId: Float){
+            mutation CreateComment($content: String!, $filmId: Float, $parentId: Float){
                 createComment(content: $content, filmId: $filmId, parentId: $parentId){
                     comment_id
                     film_id
@@ -63,6 +63,7 @@ describe('Comment resolver', () => {
                 }
             }
         `;
+
     const getCommentByFilmIdQuery = `
              query GetCommentsByFilmId($filmId: Float!){
                 getCommentsByFilmId(filmId: $filmId){
@@ -101,7 +102,7 @@ describe('Comment resolver', () => {
             }
         `;
 
-    type createCommentVariables = { filmId: number; parentId: number | null; content: string };
+    type createCommentVariables = { filmId?: number | null; parentId: number | null; content: string };
     const createComment = async (vars: createCommentVariables, context: any = {}) =>
         await testGqlCall({
             source: createCommentMut,
@@ -154,108 +155,153 @@ describe('Comment resolver', () => {
             );
             expect(comment.errors).toBeDefined();
         });
-    });
 
-    it('should create comment with correct content', async () => {
-        const comment = await createComment(
-            { filmId: 1, content: 'this is a new comment', parentId: null },
-            {
-                req: { userId: 1 },
-                user: null,
-            }
-        );
-        expect(comment.data?.createComment.content).toBe('this is a new comment');
-    });
+        it('should create comment with correct content', async () => {
+            const comment = await createComment(
+                { filmId: 1, content: 'this is a new comment', parentId: null },
+                {
+                    req: { userId: 1 },
+                    user: null,
+                }
+            );
+            expect(comment.data?.createComment.content).toBe('this is a new comment');
+        });
 
-    it('should create comment with correct userId', async () => {
-        const comment = await createComment(
-            { filmId: 1, content: 'this is a new comment', parentId: null },
-            {
-                req: { userId: 1 },
-                user: null,
-            }
-        );
-        expect(comment.data?.createComment.user_id).toBe('1');
-    });
+        it('should create comment with correct userId', async () => {
+            const comment = await createComment(
+                { filmId: 1, content: 'this is a new comment', parentId: null },
+                {
+                    req: { userId: 1 },
+                    user: null,
+                }
+            );
+            expect(comment.data?.createComment.user_id).toBe('1');
+        });
 
-    it('should create comment with correct film_id', async () => {
-        const comment = await createComment(
-            { filmId: 1, content: 'this is a new comment', parentId: null },
-            {
-                req: { userId: 1 },
-                user: null,
-            }
-        );
-        expect(comment.data?.createComment.film_id).toBe(1);
-    });
+        it('should create comment with correct film_id', async () => {
+            const comment = await createComment(
+                { filmId: 1, content: 'this is a new comment', parentId: null },
+                {
+                    req: { userId: 1 },
+                    user: null,
+                }
+            );
+            expect(comment.data?.createComment.film_id).toBe(1);
+        });
 
-    it('should save comment to db', async () => {
-        await createComment(
-            { filmId: 1, content: 'this is a new comment', parentId: null },
-            {
-                req: { userId: 1 },
-                user: null,
-            }
-        );
-        const comment = await Comment.findOne({ where: { user_id: '1' } });
-        expect(comment).toBeDefined();
-    });
+        it('should save comment to db', async () => {
+            await createComment(
+                { filmId: 1, content: 'this is a new comment', parentId: null },
+                {
+                    req: { userId: 1 },
+                    user: null,
+                }
+            );
+            const comment = await Comment.findOne({ where: { user_id: '1' } });
+            expect(comment).toBeDefined();
+        });
 
-    it('should create parent comment', async () => {
-        await createComment(
-            { filmId: 1, content: 'this is a parent comment', parentId: null },
-            {
-                req: { userId: 1 },
-                user: null,
-            }
-        );
+        it('should create parent comment', async () => {
+            await createComment(
+                { filmId: 1, content: 'this is a parent comment', parentId: null },
+                {
+                    req: { userId: 1 },
+                    user: null,
+                }
+            );
 
-        const parentComment = await Comment.findOne({ where: { content: 'this is a parent comment' } });
-        const parentCommentId = parentComment!.comment_id;
+            const parentComment = await Comment.findOne({ where: { content: 'this is a parent comment' } });
+            const parentCommentId = parentComment!.comment_id;
 
-        await createComment(
-            { filmId: 1, content: 'this is a child comment', parentId: parentCommentId },
-            {
-                req: { userId: 1 },
-                user: null,
-            }
-        );
+            await createComment(
+                { filmId: 1, content: 'this is a child comment', parentId: parentCommentId },
+                {
+                    req: { userId: 1 },
+                    user: null,
+                }
+            );
 
-        const childCommentInDb = await Reply.findOne({ where: { parent_id: parentCommentId } });
+            const childCommentInDb = await Reply.findOne({ where: { parent_id: parentCommentId } });
 
-        expect(childCommentInDb).toBeDefined();
-    });
+            expect(childCommentInDb).toBeDefined();
+        });
 
-    it('should be able to create two child comments on one parent', async () => {
-        await createComment(
-            { filmId: 1, content: 'this is a parent comment', parentId: null },
-            {
-                req: { userId: 1 },
-                user: null,
-            }
-        );
+        it('should be able to create two child comments on one parent', async () => {
+            await createComment(
+                { filmId: 1, content: 'this is a parent comment', parentId: null },
+                {
+                    req: { userId: 1 },
+                    user: null,
+                }
+            );
 
-        const parentComment = await Comment.findOne({ where: { content: 'this is a parent comment' } });
-        const parentCommentId = parentComment!.comment_id;
+            const parentComment = await Comment.findOne({ where: { content: 'this is a parent comment' } });
+            const parentCommentId = parentComment!.comment_id;
 
-        await createComment(
-            { filmId: 1, content: 'this is a child comment', parentId: parentCommentId },
-            {
-                req: { userId: 1 },
-                user: null,
-            }
-        );
-        await createComment(
-            { filmId: 1, content: 'this is another child comment', parentId: parentCommentId },
-            {
-                req: { userId: 1 },
-                user: null,
-            }
-        );
+            await createComment(
+                { filmId: 1, content: 'this is a child comment', parentId: parentCommentId },
+                {
+                    req: { userId: 1 },
+                    user: null,
+                }
+            );
+            await createComment(
+                { filmId: 1, content: 'this is another child comment', parentId: parentCommentId },
+                {
+                    req: { userId: 1 },
+                    user: null,
+                }
+            );
 
-        const childCommentInDb = await Reply.find({ where: { parent_id: parentCommentId } });
+            const childCommentInDb = await Reply.find({ where: { parent_id: parentCommentId } });
 
-        expect(childCommentInDb.length).toBe(2);
+            expect(childCommentInDb.length).toBe(2);
+        });
+
+        it('should create comment with no film_id', async () => {
+            await createComment(
+                { filmId: 1, content: 'this is a parent comment', parentId: null },
+                {
+                    req: { userId: 1 },
+                    user: null,
+                }
+            );
+
+            const parentComment = await Comment.findOne({ where: { content: 'this is a parent comment' } });
+            const parentCommentId = parentComment!.comment_id;
+            console.log(parentCommentId);
+
+            await createComment(
+                { filmId: null, content: 'this is a child comment', parentId: parentCommentId },
+                {
+                    req: { userId: 1 },
+                    user: null,
+                }
+            );
+            await createComment(
+                { filmId: null, content: 'this is another child comment', parentId: parentCommentId },
+                {
+                    req: { userId: 1 },
+                    user: null,
+                }
+            );
+
+            const childCommentInDb = await Reply.find({ where: { parent_id: parentCommentId } });
+            console.log(childCommentInDb);
+
+            expect(childCommentInDb.length).toBe(2);
+        });
+        it('should throw error if no parentId or filmId', async () => {
+            const comment = await createComment(
+                { content: 'comment', filmId: null, parentId: null },
+                {
+                    req: { userId: 1 },
+                    user: null,
+                }
+            );
+
+            expect(comment.errors?.length).toBeGreaterThan(0);
+        });
     });
 
     describe('getCommentsByFilmID', () => {
@@ -291,7 +337,9 @@ describe('Comment resolver', () => {
             const parentComment = await Comment.findOne({ where: { content: 'this is a parent comment' } });
             const parentCommentId = parentComment!.comment_id;
 
-            const parentCommentAlt = await Comment.findOne({ where: { content: 'this is another parent comment' } });
+            const parentCommentAlt = await Comment.findOne({
+                where: { content: 'this is another parent comment' },
+            });
             const parentCommentAltId = parentCommentAlt!.comment_id;
 
             await createComment(
@@ -310,7 +358,11 @@ describe('Comment resolver', () => {
             );
 
             await createComment(
-                { filmId: 1, content: 'this is a child comment of alt parent comment', parentId: parentCommentAltId },
+                {
+                    filmId: 1,
+                    content: 'this is a child comment of alt parent comment',
+                    parentId: parentCommentAltId,
+                },
                 {
                     req: { userId: 1 },
                     user: null,
@@ -376,6 +428,4 @@ describe('Comment resolver', () => {
             expect(children.data?.getRepliesOfComment.length).toBe(1);
         });
     });
-
-    describe('getCommentsByFilmId', () => {});
 });
