@@ -85,7 +85,6 @@ class FilmResolver {
         return null;
     }
 
-    // TODO introduce a getFilmsBy
     @Query(() => PaginatedFilms, { nullable: true })
     async getFilmsByCategory(
         @Arg('categoryName') categoryName: string,
