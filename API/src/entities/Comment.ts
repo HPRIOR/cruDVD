@@ -22,7 +22,7 @@ export class Comment extends BaseEntity {
     @PrimaryGeneratedColumn()
     comment_id!: number;
 
-    @Field()
+    @Field({ nullable: true })
     @Column({ nullable: true })
     film_id?: number;
 

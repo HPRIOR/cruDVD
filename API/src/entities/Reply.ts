@@ -1,7 +1,5 @@
 import { BaseEntity, Column, Entity, JoinColumn, ManyToOne, OneToMany, OneToOne, PrimaryColumn } from 'typeorm';
 import { Comment } from './Comment';
-import { Category } from './Category';
-import { Film } from './Film';
 
 @Entity()
 export class Reply extends BaseEntity {

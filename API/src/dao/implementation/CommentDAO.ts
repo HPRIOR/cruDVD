@@ -27,9 +27,8 @@ export class CommentDAO implements ICommentDAO {
         return comment || null;
     }
 
-    public getCommentsByFilmId(filmId: number): Promise<Comment | null> {
-        console.log(filmId);
-        return Promise.resolve(new Comment());
+    public async getCommentsByFilmId(filmId: number): Promise<Comment | null> {
+        return (await Comment.findOne({ where: { comment_id: filmId } })) || null;
     }
 
     public getRepliesOfComment(commentId: number): Promise<Comment | null> {

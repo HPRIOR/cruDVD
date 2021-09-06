@@ -7,14 +7,17 @@ import { getConnection } from 'typeorm';
 import { inject, injectable } from 'inversify';
 import { TYPES } from '../container/types';
 import { ICommentDAO } from '../dao/interfaces/ICommentDAO';
+import { IReplyDAO } from '../dao/interfaces/IReplyDAO';
 
 @injectable()
 @Resolver(() => Comment)
 class CommentResolver {
-    commentDAO: ICommentDAO;
+    private commentDAO: ICommentDAO;
+    private replyDAO: IReplyDAO;
 
-    constructor(@inject(TYPES.ICommentDAO) commentDAO: ICommentDAO) {
+    constructor(@inject(TYPES.ICommentDAO) commentDAO: ICommentDAO, @inject(TYPES.IReplyDAO) replyDAO: IReplyDAO) {
         this.commentDAO = commentDAO;
+        this.replyDAO = replyDAO;
     }
 
     @FieldResolver(() => [Comment], { nullable: true })
@@ -37,14 +40,12 @@ class CommentResolver {
         @Arg('parentId', { nullable: true }) parentId?: number
     ): Promise<Comment | null> {
         if (!filmId && !parentId) throw Error('Must include either a filmId or a parentId');
+        if (filmId && parentId) throw Error('Must include Either a filmId or a parentId');
         let comment = await this.commentDAO.createComment(context, content, filmId);
         if (parentId != null) {
-            // TODO: create getCommentsByFilmId in DAO
-            const parentComment = await Comment.findOne({ where: { comment_id: parentId } });
+            const parentComment = await this.commentDAO.getCommentsByFilmId(parentId);
             if (parentComment && comment) {
-                // TODO create replyDAO with create reply;
-                const commentChild = new Reply(parentComment, comment);
-                await commentChild.save();
+                await this.replyDAO.createCommentChild(parentComment, comment);
             }
         }
         return comment || null;
@@ -57,7 +58,7 @@ class CommentResolver {
                 select c.*
                 from dvdrental.public.comment c
                 where c
-                    .comment_id not in (select r.child_id from dvdrental.public.reply r)
+                          .comment_id not in (select r.child_id from dvdrental.public.reply r)
                   and c.film_id = $1
             `,
             [filmId]
