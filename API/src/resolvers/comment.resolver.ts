@@ -2,8 +2,6 @@ import { Arg, Ctx, FieldResolver, Mutation, Query, Resolver, Root, UseMiddleware
 import { Comment } from '../entities/Comment';
 import { isAuth } from '../utils/auth/authMiddleWare';
 import { Context, WithLoaders } from '../types/context';
-import { Reply } from '../entities/Reply';
-import { getConnection } from 'typeorm';
 import { inject, injectable } from 'inversify';
 import { TYPES } from '../container/types';
 import { ICommentDAO } from '../dao/interfaces/ICommentDAO';
@@ -43,7 +41,7 @@ class CommentResolver {
         if (filmId && parentId) throw Error('Must include Either a filmId or a parentId');
         let comment = await this.commentDAO.createComment(context, content, filmId);
         if (parentId != null) {
-            const parentComment = await this.commentDAO.getCommentsByFilmId(parentId);
+            const parentComment = await this.commentDAO.findCommentByCommentId(parentId);
             if (parentComment && comment) {
                 await this.replyDAO.createCommentChild(parentComment, comment);
             }
@@ -53,29 +51,12 @@ class CommentResolver {
 
     @Query(() => [Comment], { nullable: true })
     async getCommentsByFilmId(@Arg('filmId') filmId: number): Promise<Comment[] | null> {
-        const comments: Comment[] = await getConnection().query(
-            `
-                select c.*
-                from dvdrental.public.comment c
-                where c
-                          .comment_id not in (select r.child_id from dvdrental.public.reply r)
-                  and c.film_id = $1
-            `,
-            [filmId]
-        );
-        return comments ? comments : null;
+        return await this.commentDAO.getCommentsByFilmId(filmId);
     }
 
     @Query(() => [Comment], { nullable: true })
     async getRepliesOfComment(@Arg('commentId') commentId: number): Promise<Comment[] | null> {
-        const children = await getConnection()
-            .getRepository(Comment)
-            .createQueryBuilder('c')
-            .leftJoin(Reply, 'r', 'c."comment_id" = r."child_id"')
-            .where('r."parent_id" = :comment_id', { comment_id: commentId })
-            .getMany();
-
-        return children || null;
+        return await this.commentDAO.getRepliesOfComment(commentId);
     }
 }
 

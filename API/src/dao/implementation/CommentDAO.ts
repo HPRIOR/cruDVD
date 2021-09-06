@@ -2,6 +2,8 @@ import { ICommentDAO } from '../interfaces/ICommentDAO';
 import { Comment } from '../../entities/Comment';
 import { Context } from '../../types/context';
 import { injectable } from 'inversify';
+import { getConnection } from 'typeorm';
+import { Reply } from '../../entities/Reply';
 
 @injectable()
 export class CommentDAO implements ICommentDAO {
@@ -27,17 +29,32 @@ export class CommentDAO implements ICommentDAO {
         return comment || null;
     }
 
-    public async getCommentsByFilmId(filmId: number): Promise<Comment | null> {
-        return (await Comment.findOne({ where: { comment_id: filmId } })) || null;
+    public async getCommentsByFilmId(filmId: number): Promise<Comment[] | null> {
+        return (
+            (await getConnection().query(
+                `
+                select c.*
+                from dvdrental.public.comment c
+                where c .comment_id not in (select r.child_id from dvdrental.public.reply r)
+                  and c.film_id = $1
+            `,
+                [filmId]
+            )) || null
+        );
     }
 
-    public getRepliesOfComment(commentId: number): Promise<Comment | null> {
-        console.log(commentId);
-        return Promise.resolve(new Comment());
+    public async getRepliesOfComment(commentId: number): Promise<Comment[] | null> {
+        return (
+            (await getConnection()
+                .getRepository(Comment)
+                .createQueryBuilder('c')
+                .leftJoin(Reply, 'r', 'c."comment_id" = r."child_id"')
+                .where('r."parent_id" = :comment_id', { comment_id: commentId })
+                .getMany()) || null
+        );
     }
 
-    public findCommentByCommentId(comment_id: string): Promise<Comment | null> {
-        console.log(comment_id);
-        return Promise.resolve(new Comment());
+    public async findCommentByCommentId(comment_id: number): Promise<Comment | null> {
+        return (await Comment.findOne({ where: { comment_id: comment_id } })) || null;
     }
 }
