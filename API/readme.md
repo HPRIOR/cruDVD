@@ -6,7 +6,7 @@ You can create a docker image containing a postgres database and the required da
 by running the following commands (from /crudDVD):
 
 ```shell
-cd API/db
+cd db
 docker build . -t dvd-test
 ```
 
