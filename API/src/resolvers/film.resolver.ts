@@ -69,12 +69,7 @@ class FilmResolver {
 
     @Query(() => PaginatedFilms)
     async getFilms(@Arg('pagination') pagination: PaginationInput) {
-        const skip = pagination.after === null ? 0 : pagination.after;
-
-        const films =
-            pagination.take === null
-                ? await this.filmDAO.getFilms(skip!)
-                : await this.filmDAO.getFilms(skip!, pagination.take);
+        const films = await this.filmDAO.getFilms(pagination.after ?? 0, pagination.take);
         return films ? new PaginatedFilms(pagination, films) : new PaginatedFilms(pagination, null);
     }
 

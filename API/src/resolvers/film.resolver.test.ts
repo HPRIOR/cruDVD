@@ -53,17 +53,20 @@ describe('filmResolver', function () {
             );
 
         const getFilmDataWithContextLoaders = () =>
-            testGqlCall({
-                source: getFilmQuery,
-                variableValues: { title: 'Aladdin Calendar' },
-                contextValue: {
-                    loaders: {
-                        categoryLoader: createCategoryLoader(),
-                        actorLoader: createActorLoader(),
-                        languageLoader: createLanguageLoader(),
+            testGqlCall(
+                {
+                    source: getFilmQuery,
+                    variableValues: { title: 'Aladdin Calendar' },
+                    contextValue: {
+                        loaders: {
+                            categoryLoader: createCategoryLoader(),
+                            actorLoader: createActorLoader(),
+                            languageLoader: createLanguageLoader(),
+                        },
                     },
                 },
-            });
+                container
+            );
 
         it('should return data', async () => {
             const filmData = await getFilmData();
@@ -115,18 +118,17 @@ describe('filmResolver', function () {
                 }
             `;
             const getPaginatedFilms = (after: number, take?: number) =>
-                testGqlCall({
-                    source: getAllFilmsQuery,
-                    variableValues: { take: take || null, after: after || null },
-                });
+                testGqlCall(
+                    {
+                        source: getAllFilmsQuery,
+                        variableValues: { take: take || null, after: after || null },
+                    },
+                    container
+                );
 
-            it('should get first ten films', async () => {
-                const firstTenFilms = await getPaginatedFilms(0, 10);
-                let id = 1;
-                firstTenFilms.data?.getFilms.films.forEach((film: Film) => {
-                    expect(film.film_id).toBe(id.toString());
-                    id++;
-                });
+            it('should get ten films', async () => {
+                const firstTenFilms = await getPaginatedFilms(10, 10);
+                expect(firstTenFilms.data?.getFilms.films.length).toBe(10);
             });
 
             it('should return correct cursor value', async () => {
@@ -156,10 +158,13 @@ describe('filmResolver', function () {
                 }
             `;
             const getFilmsByCategoryQuery = (categoryName: string, after?: number, take?: number) =>
-                testGqlCall({
-                    source: getFilmsByCategory,
-                    variableValues: { categoryName: categoryName, take: take || null, after: after || null },
-                });
+                testGqlCall(
+                    {
+                        source: getFilmsByCategory,
+                        variableValues: { categoryName: categoryName, take: take || null, after: after || null },
+                    },
+                    container
+                );
 
             it('should get all action movies', async () => {
                 const actionFilms = await getFilmsByCategoryQuery('Action');
