@@ -4,6 +4,7 @@ const TYPES = {
     IFilmDAO: Symbol.for('IFilmDAO'),
     ICommentDAO: Symbol.for('ICommentDAO'),
     IReplyDAO: Symbol.for('IReplyDAO'),
+    IUserDAO: Symbol.for('IUserDAO'),
 };
 
 export { TYPES };

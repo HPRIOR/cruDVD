@@ -1,10 +1,9 @@
-import { RegisterInput } from '../../resolvers/types/registerInput';
 import { User } from '../../entities/User';
+import { injectable } from 'inversify';
 
-interface IUserDAO {
-    registerUser(username: string, email: string, password: string): Promise<User>;
-
+export interface IUserDAO {
+    createUser(username: string, email: string, password: string): Promise<User>;
     invalidateRefreshToken(user: User): Promise<User>;
-
-    checkLogin(user: User): Promise<User>;
+    findUserWithId(userId: number): Promise<User | null>;
+    findUserWithEmailAndUserName(email: string, username: string): Promise<User | null>;
 }

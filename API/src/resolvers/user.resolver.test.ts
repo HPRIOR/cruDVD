@@ -4,6 +4,7 @@ import { testDbConnection } from '../test-utils/testDbConnection';
 import { User } from '../entities/User';
 import { Express } from 'express';
 import createExpressApp from '../app/createExpressApp';
+import { container } from '../container/container';
 
 describe('userResolver', function () {
     let dbConn: Connection;
@@ -69,19 +70,22 @@ describe('userResolver', function () {
             email: 'test@test.com',
         }
     ) {
-        return await testGqlCall({
-            source: registerMutation,
-            contextValue: {
-                req: { userId: null },
-                res: {
-                    cookie: cookieFunc,
+        return await testGqlCall(
+            {
+                source: registerMutation,
+                contextValue: {
+                    req: { userId: null },
+                    res: {
+                        cookie: cookieFunc,
+                    },
+                    user: null,
                 },
-                user: null,
+                variableValues: {
+                    input: input,
+                },
             },
-            variableValues: {
-                input: input,
-            },
-        });
+            container
+        );
     }
 
     describe('Check login', () => {

@@ -1,7 +1,6 @@
 import { Arg, Ctx, Mutation, Query, Resolver } from 'type-graphql';
 import { User } from '../entities/User';
 import generateTokens from '../utils/auth/generateTokens';
-import { v4 as uuid } from 'uuid';
 import * as argon2 from 'argon2';
 import { RegisterInput } from './types/registerInput';
 import { UserResponse } from './types/userResponse';
@@ -15,17 +14,26 @@ import {
     shortPassword,
     shortUsername,
 } from '../utils/auth/validateRegisterInput';
-import { injectable } from 'inversify';
+import { inject, injectable } from 'inversify';
+import { TYPES } from '../container/types';
+import { IUserDAO } from '../dao/interfaces/IUserDAO';
 
 @injectable()
 @Resolver()
 export class UserResolver {
+    private userDAO: IUserDAO;
+
+    constructor(@inject(TYPES.IUserDAO) userDAO: IUserDAO) {
+        this.userDAO = userDAO;
+    }
+
     @Mutation(() => UserResponse, { nullable: true })
     async login(@Arg('input') input: RegisterInput, @Ctx() context: Context) {
         if (context.user) {
             return { user: context.user };
         }
-        const user = await User.findOne({ where: [{ email: input.email }, { username: input.username }] });
+        // const user = await User.findOne({ where: [{ email: input.email }, { username: input.username }] });
+        const user = await this.userDAO.findUserWithEmailAndUserName(input.email, input.username);
         const error = 'Invalid username or password';
         if (!user) {
             return { errors: [error] };
@@ -73,7 +81,8 @@ export class UserResolver {
         if (noUserLoggedIn) {
             return false;
         }
-        const user = await User.findOne({ where: { id: context.req.userId } });
+        // const user = await User.findOne({ where: { id: context.req.userId } });
+        const user = await this.userDAO.findUserWithId(context.req.userId);
         if (!user) {
             return false;
         } else {
@@ -96,7 +105,8 @@ export class UserResolver {
         if (context.user) {
             return context.user;
         }
-        const user = await User.findOne({ where: { id: context.req.userId } });
+        // const user = await User.findOne({ where: { id: context.req.userId } });
+        const user = await this.userDAO.findUserWithId(context.req.userId);
         return user ? user : null;
     }
 }
