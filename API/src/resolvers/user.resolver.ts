@@ -5,7 +5,6 @@ import * as argon2 from 'argon2';
 import { RegisterInput } from './types/registerInput';
 import { UserResponse } from './types/userResponse';
 import { Context } from '../types/context';
-import { getConnection } from 'typeorm';
 import { ValidateUsernamePasswordInput } from '../utils/auth/types/validateUsernamePassswordInput';
 import {
     passwordContainsSymbols,
@@ -32,7 +31,6 @@ export class UserResolver {
         if (context.user) {
             return { user: context.user };
         }
-        // const user = await User.findOne({ where: [{ email: input.email }, { username: input.username }] });
         const user = await this.userDAO.findUserWithEmailAndUserName(input.email, input.username);
         const error = 'Invalid username or password';
         if (!user) {
@@ -58,15 +56,12 @@ export class UserResolver {
             passwordContainsUpperCase,
         ];
         const errors = registerInputIsValid(input, inputValidators);
+
         const errorsExist = errors.userError || errors.passError || errors.emailError || errors.genericError;
         if (errorsExist) return { errors: errors };
+
         const encryptedPassword = await argon2.hash(input.password);
-        const user = await User.create({
-            username: input.username,
-            email: input.email,
-            password: encryptedPassword,
-            count: 0,
-        }).save();
+        const user = await this.userDAO.createUser(input.username, input.email, encryptedPassword);
 
         const { accessToken, refreshToken } = generateTokens(user);
         context.res.cookie('access-token', accessToken);
@@ -81,7 +76,6 @@ export class UserResolver {
         if (noUserLoggedIn) {
             return false;
         }
-        // const user = await User.findOne({ where: { id: context.req.userId } });
         const user = await this.userDAO.findUserWithId(context.req.userId);
         if (!user) {
             return false;
@@ -89,13 +83,7 @@ export class UserResolver {
             context.res.clearCookie('access-token');
             context.res.clearCookie('refresh-token');
             context.user = null;
-            // invalidate refresh token
-            await getConnection()
-                .createQueryBuilder()
-                .update(User)
-                .set({ count: user.count + 1 })
-                .where('id = :id', { id: user.id })
-                .execute();
+            await this.userDAO.invalidateRefreshToken(user);
             return true;
         }
     }
@@ -105,7 +93,6 @@ export class UserResolver {
         if (context.user) {
             return context.user;
         }
-        // const user = await User.findOne({ where: { id: context.req.userId } });
         const user = await this.userDAO.findUserWithId(context.req.userId);
         return user ? user : null;
     }

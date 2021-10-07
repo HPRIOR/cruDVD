@@ -10,11 +10,14 @@ import { ICommentDAO } from '../dao/interfaces/ICommentDAO';
 import { CommentDAO } from '../dao/implementation/CommentDAO';
 import { ReplyDAO } from '../dao/implementation/ReplyDAO';
 import { IReplyDAO } from '../dao/interfaces/IReplyDAO';
+import { IUserDAO } from '../dao/interfaces/IUserDAO';
+import { UserDAO } from '../dao/implementation/UserDAO';
 
 const container = new Container();
 container.bind<IFilmDAO>(TYPES.IFilmDAO).to(FilmDAO);
 container.bind<ICommentDAO>(TYPES.ICommentDAO).to(CommentDAO);
 container.bind<IReplyDAO>(TYPES.IReplyDAO).to(ReplyDAO);
+container.bind<IUserDAO>(TYPES.IUserDAO).to(UserDAO);
 container.bind<FilmResolver>(FilmResolver).to(FilmResolver).inSingletonScope();
 container.bind<CommentResolver>(CommentResolver).to(CommentResolver).inSingletonScope();
 container.bind<UserResolver>(UserResolver).to(UserResolver).inSingletonScope();

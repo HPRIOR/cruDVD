@@ -90,31 +90,43 @@ describe('userResolver', function () {
 
     describe('Check login', () => {
         it('should return null when user and req is undefined', async () => {
-            const loggedIn = await testGqlCall({
-                source: checkLoginQuery,
-                contextValue: { req: { userId: undefined }, user: undefined },
-            });
+            const loggedIn = await testGqlCall(
+                {
+                    source: checkLoginQuery,
+                    contextValue: { req: { userId: undefined }, user: undefined },
+                },
+                container
+            );
             expect(loggedIn.data?.checkLogin).toBeNull();
         });
         it('should return null when user is undefined', async () => {
-            const loggedIn = await testGqlCall({
-                source: checkLoginQuery,
-                contextValue: { req: { userId: null }, user: undefined },
-            });
+            const loggedIn = await testGqlCall(
+                {
+                    source: checkLoginQuery,
+                    contextValue: { req: { userId: null }, user: undefined },
+                },
+                container
+            );
             expect(loggedIn.data?.checkLogin).toBeNull();
         });
         it('should return null when req is undefined', async () => {
-            const loggedIn = await testGqlCall({
-                source: checkLoginQuery,
-                contextValue: { req: undefined, user: null },
-            });
+            const loggedIn = await testGqlCall(
+                {
+                    source: checkLoginQuery,
+                    contextValue: { req: undefined, user: null },
+                },
+                container
+            );
             expect(loggedIn.data?.checkLogin).toBeNull();
         });
         it('should return null when not logged in', async () => {
-            const loggedIn = await testGqlCall({
-                source: checkLoginQuery,
-                contextValue: { req: { userId: null }, user: null },
-            });
+            const loggedIn = await testGqlCall(
+                {
+                    source: checkLoginQuery,
+                    contextValue: { req: { userId: null }, user: null },
+                },
+                container
+            );
             expect(loggedIn.data?.checkLogin).toBeNull();
         });
 
@@ -125,20 +137,26 @@ describe('userResolver', function () {
             user.email = 'test.test@test.com';
             user.username = 'test-user';
             user.password = 'test-pass';
-            const loggedIn = await testGqlCall({
-                source: checkLoginQuery,
-                contextValue: { req: { userId: null }, user: user },
-            });
+            const loggedIn = await testGqlCall(
+                {
+                    source: checkLoginQuery,
+                    contextValue: { req: { userId: null }, user: user },
+                },
+                container
+            );
             expect(loggedIn.data?.checkLogin.id).toBeDefined();
             expect(loggedIn.data?.checkLogin.username).toBe('test-user');
         });
 
         it('should find user in DB when user id in context', async () => {
             const gqlResponse = await registerUser(cookieFuncStub);
-            const loggedIn = await testGqlCall({
-                source: checkLoginQuery,
-                contextValue: { req: { userId: gqlResponse.data?.register.user.id }, user: null },
-            });
+            const loggedIn = await testGqlCall(
+                {
+                    source: checkLoginQuery,
+                    contextValue: { req: { userId: gqlResponse.data?.register.user.id }, user: null },
+                },
+                container
+            );
             expect(loggedIn.data?.checkLogin.id).toBe(gqlResponse.data?.register.user.id);
             expect(loggedIn.data?.checkLogin.username).toBe('test-user');
         });
@@ -303,10 +321,13 @@ describe('userResolver', function () {
                 user: null,
             }
         ) =>
-            await testGqlCall({
-                source: logoutQuery,
-                contextValue: context,
-            });
+            await testGqlCall(
+                {
+                    source: logoutQuery,
+                    contextValue: context,
+                },
+                container
+            );
 
         it('should return false when no user logged in', async () => {
             const logout = await logoutMut();
