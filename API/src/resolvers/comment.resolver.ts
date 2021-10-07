@@ -37,16 +37,21 @@ class CommentResolver {
         @Arg('filmId', { nullable: true }) filmId?: number,
         @Arg('parentId', { nullable: true }) parentId?: number
     ): Promise<Comment | null> {
-        if (!filmId && !parentId) throw Error('Must include either a filmId or a parentId');
-        if (filmId && parentId) throw Error('Must include Either a filmId or a parentId');
+        // TODO use exclusive or
+        if ((!filmId && !parentId) || (filmId && parentId)) throw Error('Must include either a filmId or a parentId');
         let comment = await this.commentDAO.createComment(context, content, filmId);
-        if (parentId != null) {
-            const parentComment = await this.commentDAO.findCommentByCommentId(parentId);
-            if (parentComment && comment) {
-                await this.replyDAO.createCommentChild(parentComment, comment);
-            }
-        }
+
+        const isReplyOfAnotherComment = parentId != null;
+        if (isReplyOfAnotherComment) await this.createReply(parentId!, comment);
+
         return comment || null;
+    }
+
+    async createReply(parentId: number, thisComment: Comment | null) {
+        const parentComment = await this.commentDAO.findCommentByCommentId(parentId);
+        if (parentComment && thisComment) {
+            await this.replyDAO.createCommentChild(parentComment, thisComment);
+        }
     }
 
     @Query(() => [Comment], { nullable: true })

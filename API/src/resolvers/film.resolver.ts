@@ -19,6 +19,11 @@ class PaginationInput {
 
 @ObjectType()
 class PaginatedFilms {
+    @Field(() => [Film])
+    films: Film[] | null;
+    @Field()
+    cursor: number;
+
     constructor(pagination: PaginationInput, films: Film[] | null) {
         if (films) {
             this.films = films;
@@ -27,11 +32,6 @@ class PaginatedFilms {
         const after = pagination.after || 0;
         this.cursor = take + after;
     }
-
-    @Field(() => [Film])
-    films: Film[] | null;
-    @Field()
-    cursor: number;
 }
 
 @injectable()

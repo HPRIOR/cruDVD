@@ -1,5 +1,4 @@
 import { BaseEntity, Column, Entity, JoinColumn, OneToOne, PrimaryColumn, UpdateDateColumn } from 'typeorm';
-import { FilmActor } from './FilmActor';
 import { Film } from './Film';
 
 @Entity({ synchronize: false })

@@ -8,10 +8,11 @@ export const createCategoryLoader = () =>
     new DataLoader<number, string>(async filmIds => {
         const categories: (Category & WithFilmId)[] = await getConnection().query(
             `
-            select c.name, fc.film_id
-            from dvdrental.public.category c, dvdrental.public.film_category fc
-            where c.category_id = fc.category_id
-            and fc.film_id = ANY($1)
+                select c.name, fc.film_id
+                from dvdrental.public.category c,
+                     dvdrental.public.film_category fc
+                where c.category_id = fc.category_id
+                  and fc.film_id = ANY ($1)
             `,
             [filmIds]
         );
