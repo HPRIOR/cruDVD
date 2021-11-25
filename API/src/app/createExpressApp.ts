@@ -18,6 +18,7 @@ const createExpressApp = async () => {
     app.set('trust proxy', 1);
 
     app.use(cookieParser());
+
     app.use(
         cors({
             origin: process.env.CORS_ORIGIN,

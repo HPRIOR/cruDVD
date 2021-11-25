@@ -10,6 +10,7 @@ import {
     passwordContainsSymbols,
     passwordContainsUpperCase,
     registerInputIsValid,
+    shortEmail,
     shortPassword,
     shortUsername,
 } from '../utils/auth/validateRegisterInput';
@@ -54,6 +55,7 @@ export class UserResolver {
             shortUsername,
             passwordContainsSymbols,
             passwordContainsUpperCase,
+            shortEmail,
         ];
         const errors = registerInputIsValid(input, inputValidators);
 
